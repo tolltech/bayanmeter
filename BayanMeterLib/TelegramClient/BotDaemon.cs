@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.Enums;
@@ -10,11 +9,13 @@ namespace Tolltech.BayanMeterLib.TelegramClient
     {
         private readonly TelegramBotClient client;
         private readonly ITelegramClient telegramClient;
+        private readonly IImageBayanService imageBayanService;
 
-        public BotDaemon(TelegramBotClient client, ITelegramClient telegramClient)
+        public BotDaemon(TelegramBotClient client, ITelegramClient telegramClient, IImageBayanService imageBayanService)
         {
             this.client = client;
             this.telegramClient = telegramClient;
+            this.imageBayanService = imageBayanService;
         }
 
         public void BotOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
@@ -34,15 +35,10 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             }
 
             var bytes = telegramClient.GetPhoto(photoSize.FileId);
-            
-            File.WriteAllBytes("test.jpg", bytes);
 
-            // if (string.IsNullOrEmpty(photo))
-            // {
-            //     return;
-            // }
+            var bayanMetric = imageBayanService.GetBayanMetric(bytes);
 
-            client.SendTextMessageAsync(message.Chat.Id, $"{message.Text} {photoSize.Height} {photoSize.Width} {bytes.Length}").GetAwaiter().GetResult();
+            client.SendTextMessageAsync(message.Chat.Id, $"{message.Text} {photoSize.Height} {photoSize.Width} {bytes.Length}. Metric - {bayanMetric}").GetAwaiter().GetResult();
         }
     }
 }
