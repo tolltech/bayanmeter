@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.Enums;
+using Tolltech.BayanMeterLib.Helpers;
 
 namespace Tolltech.BayanMeter
 {
@@ -35,9 +37,34 @@ namespace Tolltech.BayanMeter
         private static void BotOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
         {
             var message = messageEventArgs.Message;
-            if (message?.Type == MessageType.Text)
+            var photoSize = message?.Photo?.FirstOrDefault();
+
+            if (photoSize == null)
             {
-                client.SendTextMessageAsync(message.Chat.Id, message.Text).GetAwaiter().GetResult();
+                return;
+            }
+
+            byte[] bytes;
+            Telegram.Bot.Types.File file;
+            using (var stream = new MemoryStream(photoSize.FileSize))
+            {
+                file = client.GetFileAsync(photoSize.FileId).GetAwaiter().GetResult();
+                client.DownloadFileAsync(file.FilePath, stream).GetAwaiter().GetResult();
+                stream.Seek(0, SeekOrigin.Begin);
+
+                bytes = stream.ReadToByteArray();
+            }
+
+            File.WriteAllBytes("test.jpg", bytes);
+
+            // if (string.IsNullOrEmpty(photo))
+            // {
+            //     return;
+            // }
+
+            if (message?.Type == MessageType.Photo)
+            {
+                client.SendTextMessageAsync(message.Chat.Id, $"{message.Text} {photoSize.Height} {photoSize.Width} {bytes.Length}").GetAwaiter().GetResult();
             }
         }
     }
