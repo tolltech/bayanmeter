@@ -8,6 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="log4net.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.11" />
+    <PackageReference Include="Ninject" Version="3.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BayanMeterLib\BayanMeterLib.csproj" />
   </ItemGroup>
 

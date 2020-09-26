@@ -2,6 +2,6 @@
 {
     public interface IImageHasher
     {
-        string GetHash();
+        string GetHash(byte[] jpegByteArray);
     }
 }
