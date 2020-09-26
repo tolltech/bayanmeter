@@ -1,0 +1,5 @@
+/.vs/*
+/BayanMeter.sln.DotSettings.user
+/BayanMeter/args.txt
+/*/bin/*
+/*/obj/*
