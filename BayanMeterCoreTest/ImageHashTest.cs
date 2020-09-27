@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Reflection;
 using Ninject;
 using Tolltech.BayanMeterLib;
 using Xunit;
@@ -18,7 +17,7 @@ namespace BayanMeterCoreTest
         [Fact]
         public void TestGetHash()
         {
-            var inputFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Images", "test.jpg");
+            var inputFilePath = Path.Combine(WorkDirecoryPath, "Images", "test.jpg");
 
             Assert.True(File.Exists(inputFilePath));
 
