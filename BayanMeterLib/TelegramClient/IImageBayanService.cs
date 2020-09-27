@@ -1,7 +1,10 @@
-﻿namespace Tolltech.BayanMeterLib.TelegramClient
+﻿using JetBrains.Annotations;
+
+namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public interface IImageBayanService
     {
-        int GetBayanMetric(byte[] imageBytes);
+        void SaveMessage([NotNull] [ItemNotNull] params MessageDto[] messages);
+        int GetBayanMetric([NotNull] byte[] imageBytes);
     }
 }

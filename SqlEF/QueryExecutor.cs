@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Tolltech.SqlEF.Integration;
 
 namespace Tolltech.SqlEF
@@ -15,18 +14,18 @@ namespace Tolltech.SqlEF
             this.sqlHandlerProvider = sqlHandlerProvider;
         }
 
-        public async Task ExecuteAsync(Func<TSqlHandler, Task> query)
+        public void Execute(Action<TSqlHandler> query)
         {
             var handle = sqlHandlerProvider.Create<TSqlHandler, TSqlEntity>(dataContext);
-            await query(handle).ConfigureAwait(false);
-            await dataContext.SaveChangesAsync().ConfigureAwait(false);
+            query(handle);
+            dataContext.SaveChanges();
         }
 
-        public async Task<TResult> ExecuteAsync<TResult>(Func<TSqlHandler, Task<TResult>> query)
+        public TResult Execute<TResult>(Func<TSqlHandler, TResult> query)
         {
             var handle = sqlHandlerProvider.Create<TSqlHandler, TSqlEntity>(dataContext);
-            var result = await query(handle).ConfigureAwait(false);
-            await dataContext.SaveChangesAsync().ConfigureAwait(false);
+            var result = query(handle);
+            dataContext.SaveChanges();
             return result;
         }
 
