@@ -16,6 +16,8 @@ namespace Tolltech.BayanMeter
 
         static void Main(string[] args)
         {
+            Console.WriteLine($"Start BayanMeter {DateTime.Now}");
+
             var argsFileName = "args.txt";
             var token = args.FirstOrDefault()
                         ?? (File.Exists(argsFileName)
@@ -43,6 +45,7 @@ namespace Tolltech.BayanMeter
             finally
             {
                 client.StopReceiving();
+                Console.WriteLine($"End BayanMeter {DateTime.Now}");
             }
         }
     }

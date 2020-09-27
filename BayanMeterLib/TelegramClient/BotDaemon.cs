@@ -29,6 +29,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             {
                 var message = messageEventArgs.Message;
 
+                log.Info($"RecieveMessage {message.Chat.Id} {message.MessageId}");
+
                 if (message?.Type != MessageType.Photo)
                 {
                     return;
@@ -46,7 +48,11 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 var messageDto = Convert(message, bytes);
                 imageBayanService.SaveMessage(messageDto);
 
+                log.Info($"SavedMessage {message.Chat.Id} {message.MessageId}");
+
                 var bayanMetric = imageBayanService.GetBayanMetric(messageDto.StrId);
+
+                log.Info($"GetBayanMetrics {bayanMetric.AlreadyWasCount} {message.Chat.Id} {message.MessageId}");
 
                 if (bayanMetric.AlreadyWasCount > 0)
                 {
