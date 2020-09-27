@@ -30,7 +30,7 @@ namespace Tolltech.BayanMeter
             var kernel = new StandardKernel(new ConfigurationModule("log4net.config"));
             client = new TelegramBotClient(token);
             kernel.Bind<TelegramBotClient>().ToConstant(client);
-            kernel.Bind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
+            kernel.Rebind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
 
             var botDaemon = kernel.Get<IBotDaemon>();
             try

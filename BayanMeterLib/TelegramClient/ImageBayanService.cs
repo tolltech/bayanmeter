@@ -30,7 +30,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             }
 
             var existentStrIds = new HashSet<string>(existents.Select(x => x.StrId));
-            var toCreate = msgByStrId.Values.Where(x => !existentStrIds.Contains(x.StrId)).Select(x => Convert(x, null)).ToArray();
+            var toCreate = msgByStrId.Values.Where(x => !existentStrIds.Contains(x.StrId)).Select(x => Convert(x)).ToArray();
 
             queryExecutor.Execute(x => x.Create(toCreate));
             queryExecutor.Execute(x => x.Update());

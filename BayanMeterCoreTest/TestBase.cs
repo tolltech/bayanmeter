@@ -17,7 +17,7 @@ namespace BayanMeterCoreTest
 
         protected TestBase()
         {
-            var argsFileName = "args.txt";
+            var argsFileName = Path.Combine(WorkDirecoryPath, "args.txt");
             var token = File.Exists(argsFileName)
                             ? File.ReadAllLines(argsFileName).FirstOrDefault()
                             : string.Empty;
@@ -29,6 +29,6 @@ namespace BayanMeterCoreTest
             kernel = new StandardKernel(new ConfigurationModule());;
             var client = new TelegramBotClient(token);
             kernel.Bind<TelegramBotClient>().ToConstant(client);
-            kernel.Bind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
+            kernel.Rebind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
         }
     }}
