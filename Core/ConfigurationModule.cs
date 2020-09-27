@@ -24,6 +24,8 @@ namespace Tolltech.Core
                 XmlConfigurator.Configure(fileInfo);
             }
 
-            IoCResolver.Resolve((@interface, implementation) => this.Bind(@interface).To(implementation), "Tolltech");                
+            IoCResolver.Resolve((@interface, implementation) => this.Bind(@interface).To(implementation), null,
+                "Tolltech");
         }
-    }}
+    }
+}

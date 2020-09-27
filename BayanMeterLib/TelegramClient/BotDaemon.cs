@@ -48,9 +48,10 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 var bayanMetric = imageBayanService.GetBayanMetric(messageDto.StrId);
 
-                client.SendTextMessageAsync(message.Chat.Id,
-                        $"{message.Text} {photoSize.Height} {photoSize.Width} {bytes.Length}. Metric - {bayanMetric}")
-                    .GetAwaiter().GetResult();
+                if (bayanMetric.AlreadyWasCount > 0)
+                {
+                    client.SendTextMessageAsync(message.Chat.Id, $" [:||[{bayanMetric.AlreadyWasCount}]||:]", replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
+                }
             }
             catch (Exception e)
             {

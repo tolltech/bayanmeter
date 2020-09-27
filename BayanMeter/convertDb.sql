@@ -28,4 +28,7 @@ CREATE INDEX IF NOT EXISTS messages_chat_id_message_date on messages (chat_id, m
 CREATE INDEX IF NOT EXISTS messages_timestamp on messages (timestamp);
 
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS bayan_count int default 0;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS previous_message_id int null;
+
+ALTER TABLE messages ALTER COLUMN edit_date DROP NOT NULL;
 --ALTER TABLE ImportResults ADD COLUMN IF NOT EXISTS candidatealbumid varchar NULL;

@@ -1,22 +1,56 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Tolltech.Core
 {
     public static class IoCResolver
     {
-        public static void Resolve(Action<Type, Type> resolve, params string[] assmeblyNames)
+        private static readonly HashSet<Type> emptyTypeHashset =  new HashSet<Type>();
+
+        public static void Resolve(Action<Type, Type> resolve, HashSet<Type> ignoreTypes = null, params string[] assemblyNames)
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => assmeblyNames.Any(y => x.FullName.StartsWith(y + "."))).ToArray();
-            var interfaces = assemblies.SelectMany(x => x.GetTypes().Where(y => y.IsInterface)).ToArray();
-            var types = assemblies.SelectMany(x => x.GetTypes().Where(y => !y.IsInterface && y.IsClass && !y.IsAbstract)).ToArray();
+
+            ignoreTypes ??= emptyTypeHashset;
+
+            var assemblyNameHashSet = new HashSet<string>(assemblyNames);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => assemblyNameHashSet.Any(y => x.FullName.StartsWith(y)))
+                .ToArray();
+
+            assemblies = assemblies
+                .Concat(assemblies
+                    .SelectMany(x => x.GetReferencedAssemblies())
+                    .Where(x => assemblyNameHashSet.Any(y => x.FullName.StartsWith(y)))
+                    .Select(Assembly.Load))
+                .GroupBy(x => x.FullName)
+                .Select(x => x.First())
+                .ToArray();
+
+            var interfaces = assemblies
+                .SelectMany(x => x.GetTypes()
+                    .Where(y => y.IsInterface))
+                .Where(x => !ignoreTypes.Contains(x))
+                .ToArray();
+
+            var types = assemblies
+                .SelectMany(x => x.GetTypes()
+                    .Where(y => !y.IsInterface && y.IsClass && !y.IsAbstract))
+                .Where(x => !ignoreTypes.Contains(x))
+                .ToArray();
+
             foreach (var @interface in interfaces)
             {
-                var realisations = types.Where(x => @interface.IsAssignableFrom(x)).ToArray();
-                foreach (var realisation in realisations)
+                var realizations = types
+                    .Where(x => @interface.IsAssignableFrom(x))
+                    .ToArray();
+
+                foreach (var realization in realizations)
                 {
-                    resolve(@interface, realisation);
+                    resolve(@interface, realization);
                 }
             }
         }
-    }}
+    }
+}

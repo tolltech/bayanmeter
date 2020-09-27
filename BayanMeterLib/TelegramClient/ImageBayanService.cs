@@ -88,12 +88,14 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 if (previousMessage.Hash.HashEquals(message.Hash))
                 {
                     message.BayanCount = previousMessage.BayanCount + 1;
+                    message.PreviousMessageId = previousMessage.IntId;
 
                     queryExecutor.Execute(x => x.Update());
 
                     return new BayanResultDto
                     {
-                        AlreadyWasCount = message.BayanCount
+                        AlreadyWasCount = message.BayanCount,
+                        PreviousMessageId = previousMessage.IntId
                     };
                 }
             }

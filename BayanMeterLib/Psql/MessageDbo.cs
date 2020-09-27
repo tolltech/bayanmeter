@@ -57,5 +57,8 @@ namespace Tolltech.BayanMeterLib.Psql
 
         [Column("bayan_count", TypeName = "int"), Required]
         public int BayanCount { get; set; }
+
+        [Column("previous_message_id", TypeName = "int")]
+        public int PreviousMessageId { get; set; }
     }
 }
