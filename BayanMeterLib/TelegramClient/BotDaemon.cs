@@ -46,7 +46,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 var messageDto = Convert(message, bytes);
                 imageBayanService.SaveMessage(messageDto);
 
-                var bayanMetric = imageBayanService.GetBayanMetric(bytes);
+                var bayanMetric = imageBayanService.GetBayanMetric(messageDto.StrId);
 
                 client.SendTextMessageAsync(message.Chat.Id,
                         $"{message.Text} {photoSize.Height} {photoSize.Width} {bytes.Length}. Metric - {bayanMetric}")

@@ -19,7 +19,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
         public void SaveMessage(params MessageDto[] messages)
         {
-            var msgByStrId = messages.GroupBy(x => x.StrId).Select(x => x.First()).ToDictionary(x=>x.StrId);
+            var msgByStrId = messages.GroupBy(x => x.StrId).Select(x => x.First()).ToDictionary(x => x.StrId);
 
             using var queryExecutor = queryExecutorFactory.Create<MessageHandler, MessageDbo>();
             var existents = queryExecutor.Execute(x => x.Select(msgByStrId.Keys.ToArray()));
@@ -30,7 +30,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             }
 
             var existentStrIds = new HashSet<string>(existents.Select(x => x.StrId));
-            var toCreate = msgByStrId.Values.Where(x => !existentStrIds.Contains(x.StrId)).Select(x => Convert(x)).ToArray();
+            var toCreate = msgByStrId.Values.Where(x => !existentStrIds.Contains(x.StrId)).Select(x => Convert(x))
+                .ToArray();
 
             queryExecutor.Execute(x => x.Create(toCreate));
             queryExecutor.Execute(x => x.Update());
@@ -61,9 +62,46 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             return result;
         }
 
-        public int GetBayanMetric(byte[] imageBytes)
+        public BayanResultDto GetBayanMetric(string messageStrId)
         {
-            return 0;
+            using var queryExecutor = queryExecutorFactory.Create<MessageHandler, MessageDbo>();
+
+            var message = queryExecutor.Execute(x => x.Find(messageStrId));
+
+            if (message == null)
+            {
+                return new BayanResultDto
+                {
+                    AlreadyWasCount = 0
+                };
+            }
+
+            var toDate = message.MessageDate;
+            var fromDate = toDate.AddMonths(-6);
+            var previousMessages = queryExecutor.Execute(x => x.Select(message.ChatId, fromDate, toDate))
+                .Where(x => x.StrId != messageStrId)
+                .OrderByDescending(x => x.MessageDate)
+                .ToArray();
+
+            foreach (var previousMessage in previousMessages)
+            {
+                if (previousMessage.Hash.HashEquals(message.Hash))
+                {
+                    message.BayanCount = previousMessage.BayanCount + 1;
+
+                    queryExecutor.Execute(x => x.Update());
+
+                    return new BayanResultDto
+                    {
+                        AlreadyWasCount = message.BayanCount
+                    };
+                }
+            }
+
+            return new BayanResultDto
+            {
+                AlreadyWasCount = 0
+            };
         }
     }
 }
