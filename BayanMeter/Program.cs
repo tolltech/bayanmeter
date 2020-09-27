@@ -4,6 +4,7 @@ using System.Linq;
 using Ninject;
 using Telegram.Bot;
 using Tolltech.BayanMeterLib.TelegramClient;
+using Tolltech.Core;
 
 namespace Tolltech.BayanMeter
 {

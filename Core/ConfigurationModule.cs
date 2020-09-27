@@ -3,7 +3,7 @@ using System.IO;
 using log4net.Config;
 using Ninject.Modules;
 
-namespace Tolltech.BayanMeter
+namespace Tolltech.Core
 {
     public class ConfigurationModule : NinjectModule
     {

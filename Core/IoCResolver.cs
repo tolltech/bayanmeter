@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Tolltech.BayanMeter
+namespace Tolltech.Core
 {
     public static class IoCResolver
     {
