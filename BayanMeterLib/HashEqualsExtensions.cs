@@ -23,7 +23,7 @@
                 }
             }
 
-            return diffs * 1.0 / left.Length < 0.05;
+            return diffs * 1.0 / left.Length < 0.04;
         }
     }
 }
