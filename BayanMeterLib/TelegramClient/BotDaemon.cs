@@ -56,7 +56,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 if (bayanMetric.AlreadyWasCount > 0)
                 {
-                    client.SendTextMessageAsync(message.Chat.Id, $" [:||[{bayanMetric.AlreadyWasCount}]||:] #bayan", replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
+                    client.SendTextMessageAsync(message.Chat.Id, $"TEST MODE [:||[{bayanMetric.AlreadyWasCount}]||:] #bayan", replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e)
