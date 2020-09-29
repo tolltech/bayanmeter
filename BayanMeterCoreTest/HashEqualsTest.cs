@@ -19,6 +19,7 @@ namespace BayanMeterCoreTest
         [InlineData(true, "complex1", "complex2")]
         [InlineData(false, "complex3", "complex2")]
         [InlineData(false, "complex1", "complex3")]
+        [InlineData(true, "test1", "test2")]
         public void TestHashEquals(bool expected, string left, string right)
         {
             var leftPath = Path.Combine(WorkDirecoryPath, "Images", $"{left}.jpg");
