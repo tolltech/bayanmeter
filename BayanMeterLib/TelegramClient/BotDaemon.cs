@@ -56,13 +56,20 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 if (bayanMetric.AlreadyWasCount > 0)
                 {
-                    client.SendTextMessageAsync(message.Chat.Id, $"TEST MODE [:||[{bayanMetric.AlreadyWasCount}]||:] #bayan", replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
+                    client.SendTextMessageAsync(message.Chat.Id, GetBayanMessage(bayanMetric), replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e)
             {
                 log.Error("BotDaemonException", e);
             }
+        }
+
+        private static string GetBayanMessage(BayanResultDto bayanMetric)
+        {
+            var chatId = bayanMetric.PreviousChatId == -1001261621141 ? 1261621141 : bayanMetric.PreviousChatId;
+            return $"[:||[{bayanMetric.AlreadyWasCount}]||:] #bayan\r\n" +
+                   $"https://t.me/c/{chatId}/{bayanMetric.PreviousMessageId}";
         }
 
         private static MessageDto Convert(Message message, byte[] bytes)

@@ -95,7 +95,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                     return new BayanResultDto
                     {
                         AlreadyWasCount = message.BayanCount,
-                        PreviousMessageId = previousMessage.IntId
+                        PreviousMessageId = previousMessage.IntId,
+                        PreviousChatId = previousMessage.ChatId
                     };
                 }
             }
