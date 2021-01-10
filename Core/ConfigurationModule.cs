@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
@@ -27,11 +28,11 @@ namespace Tolltech.Core
                 if (!fileInfo.Exists)
                 {
                     Console.WriteLine($"Logger configuration file {fileInfo.FullName} not found. Use default");
-
                     Logger.Setup();
                 }
 
-                XmlConfigurator.Configure(fileInfo);
+                var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+                XmlConfigurator.Configure(logRepository, new FileInfo(log4NetFileName));
 
                 Console.WriteLine($"Logger was configured");
             }
