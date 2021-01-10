@@ -17,7 +17,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
         private static readonly ILog log = LogManager.GetLogger(typeof(BotDaemon));
 
-        public BotDaemon(TelegramBotClient client, ITelegramClient telegramClient, IImageBayanService imageBayanService, ISettings settings)
+        public BotDaemon(TelegramBotClient client, ITelegramClient telegramClient, IImageBayanService imageBayanService,
+            ISettings settings)
         {
             this.client = client;
             this.telegramClient = telegramClient;
@@ -58,16 +59,26 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 if (bayanMetric.AlreadyWasCount > 0)
                 {
+                    var fromChatId = message.Chat.Id;
                     var sendChatId = long.TryParse(settings.SpecialForAnswersChatId, out var chatId)
                         ? chatId
                         : message.Chat.Id;
 
-                    client.SendTextMessageAsync(sendChatId, GetBayanMessage(bayanMetric), replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
+                    if (fromChatId == sendChatId)
+                    {
+                        client.SendTextMessageAsync(sendChatId, GetBayanMessage(bayanMetric), replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        client.ForwardMessageAsync(sendChatId, fromChatId, messageDto.IntId).GetAwaiter().GetResult();
+                        client.SendTextMessageAsync(sendChatId, GetBayanMessage(bayanMetric)).GetAwaiter().GetResult();
+                    }
                 }
             }
             catch (Exception e)
             {
                 log.Error("BotDaemonException", e);
+                Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             }
         }
 
