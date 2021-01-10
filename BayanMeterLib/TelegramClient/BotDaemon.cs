@@ -13,14 +13,16 @@ namespace Tolltech.BayanMeterLib.TelegramClient
         private readonly TelegramBotClient client;
         private readonly ITelegramClient telegramClient;
         private readonly IImageBayanService imageBayanService;
+        private readonly ISettings settings;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(BotDaemon));
 
-        public BotDaemon(TelegramBotClient client, ITelegramClient telegramClient, IImageBayanService imageBayanService)
+        public BotDaemon(TelegramBotClient client, ITelegramClient telegramClient, IImageBayanService imageBayanService, ISettings settings)
         {
             this.client = client;
             this.telegramClient = telegramClient;
             this.imageBayanService = imageBayanService;
+            this.settings = settings;
         }
 
         public void BotOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
@@ -56,7 +58,11 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 if (bayanMetric.AlreadyWasCount > 0)
                 {
-                    client.SendTextMessageAsync(message.Chat.Id, GetBayanMessage(bayanMetric), replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
+                    var sendChatId = long.TryParse(settings.SpecialForAnswersChatId, out var chatId)
+                        ? chatId
+                        : message.Chat.Id;
+
+                    client.SendTextMessageAsync(sendChatId, GetBayanMessage(bayanMetric), replyToMessageId: messageDto.IntId).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e)
@@ -67,7 +73,15 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
         private static string GetBayanMessage(BayanResultDto bayanMetric)
         {
-            var chatId = bayanMetric.PreviousChatId == -1001261621141 ? 1261621141 : bayanMetric.PreviousChatId;
+            //" -1001261621141"
+            var chatIdStr = bayanMetric.PreviousChatId.ToString();
+            if (chatIdStr.StartsWith("-100"))
+            {
+                chatIdStr = chatIdStr.Replace("-100", string.Empty);
+            }
+
+            var chatId = long.Parse(chatIdStr);
+
             return $"[:||[{bayanMetric.AlreadyWasCount}]||:] #bayan\r\n" +
                    $"https://t.me/c/{chatId}/{bayanMetric.PreviousMessageId}";
         }
