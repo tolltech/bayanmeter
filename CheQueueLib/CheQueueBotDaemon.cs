@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using log4net;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -31,35 +30,37 @@ namespace Tolltech.CheQueueLib
 
                 log.Info($"RecieveMessage {message.Chat.Id} {message.MessageId}");
 
-                if (message?.Type != MessageType.Photo)
+                if (message.Type != MessageType.Photo)
                 {
                     return;
                 }
 
-                var photoSize = message?.Photo?.FirstOrDefault();
+                var photoSizes = message.Photo;
 
-                if (photoSize == null)
+                if (photoSizes == null || photoSizes.Length == 0)
                 {
                     return;
                 }
 
-                var bytes = telegramClient.GetPhoto(photoSize.FileId);
-
-                var fromChatId = message.Chat.Id;
-                var sendChatId = long.TryParse(settings.SpecialForAnswersChatId, out var chatId)
-                    ? chatId
-                    : message.Chat.Id;
-
-                if (fromChatId == sendChatId)
+                foreach (var photoSize in photoSizes)
                 {
-                    client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes", replyToMessageId: message.MessageId).GetAwaiter().GetResult();
+                    var bytes = telegramClient.GetPhoto(photoSize.FileId);
+
+                    var fromChatId = message.Chat.Id;
+                    var sendChatId = long.TryParse(settings.SpecialForAnswersChatId, out var chatId)
+                        ? chatId
+                        : message.Chat.Id;
+
+                    if (fromChatId == sendChatId)
+                    {
+                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes", replyToMessageId: message.MessageId).GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        client.ForwardMessageAsync(sendChatId, fromChatId, message.MessageId).GetAwaiter().GetResult();
+                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes").GetAwaiter().GetResult();
+                    }
                 }
-                else
-                {
-                    client.ForwardMessageAsync(sendChatId, fromChatId, message.MessageId).GetAwaiter().GetResult();
-                    client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes").GetAwaiter().GetResult();
-                }
-                
             }
             catch (Exception e)
             {
