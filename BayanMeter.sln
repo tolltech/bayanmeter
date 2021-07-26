@@ -9,13 +9,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayanMeterLib", "BayanMeter
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{B6A457BB-0593-471B-915C-3881D7D7F342}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BayanMeterCoreTest", "BayanMeterCoreTest\BayanMeterCoreTest.csproj", "{E86DBEE9-8C6B-4F87-929D-5F53988183B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayanMeterCoreTest", "BayanMeterCoreTest\BayanMeterCoreTest.csproj", "{E86DBEE9-8C6B-4F87-929D-5F53988183B4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlEF", "SqlEF\SqlEF.csproj", "{C741613A-86EA-48C6-B2AB-1FE06602D9B1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostgreEF", "PostgreEF\PostgreEF.csproj", "{6D24EA78-EF39-4178-8272-FA4ADA79A1D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migration", "Migration\Migration.csproj", "{962D798C-736D-4DB6-BB98-54F47B472F72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration", "Migration\Migration.csproj", "{962D798C-736D-4DB6-BB98-54F47B472F72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueue", "CheQueue\CheQueue.csproj", "{18D94217-A981-4CFE-8A51-8AD48D54C73D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramCore", "TelegramCore\TelegramCore.csproj", "{19306443-5F2E-4DCF-9809-6DB688185970}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueueTest", "CheQueueTest\CheQueueTest.csproj", "{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +57,18 @@ Global
 		{962D798C-736D-4DB6-BB98-54F47B472F72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{962D798C-736D-4DB6-BB98-54F47B472F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{962D798C-736D-4DB6-BB98-54F47B472F72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18D94217-A981-4CFE-8A51-8AD48D54C73D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18D94217-A981-4CFE-8A51-8AD48D54C73D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18D94217-A981-4CFE-8A51-8AD48D54C73D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18D94217-A981-4CFE-8A51-8AD48D54C73D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19306443-5F2E-4DCF-9809-6DB688185970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19306443-5F2E-4DCF-9809-6DB688185970}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19306443-5F2E-4DCF-9809-6DB688185970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19306443-5F2E-4DCF-9809-6DB688185970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
