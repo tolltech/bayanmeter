@@ -5,9 +5,9 @@ using Ninject;
 using Telegram.Bot;
 using Tolltech.BayanMeter.Psql;
 using Tolltech.BayanMeterLib;
-using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.Core;
 using Tolltech.PostgreEF.Integration;
+using Tolltech.TelegramCore;
 
 namespace Tolltech.BayanMeter
 {

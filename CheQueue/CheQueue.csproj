@@ -8,6 +8,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="convertDb.sql" />
+    <None Remove="log4net.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="convertDb.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CheQueueLib\CheQueueLib.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\PostgreEF\PostgreEF.csproj" />
+    <ProjectReference Include="..\TelegramCore\TelegramCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="args.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
