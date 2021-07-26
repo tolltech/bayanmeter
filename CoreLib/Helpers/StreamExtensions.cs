@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Tolltech.BayanMeterLib.Helpers
+namespace Tolltech.CoreLib.Helpers
 {
     public static class StreamExtensions
     {

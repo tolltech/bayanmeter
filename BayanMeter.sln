@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramCore", "TelegramCor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueueTest", "CheQueueTest\CheQueueTest.csproj", "{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueueLib", "CheQueueLib\CheQueueLib.csproj", "{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreLib", "CoreLib\CoreLib.csproj", "{B0C07C18-0659-4815-AC04-BB551617FF27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,14 @@ Global
 		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0C07C18-0659-4815-AC04-BB551617FF27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0C07C18-0659-4815-AC04-BB551617FF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0C07C18-0659-4815-AC04-BB551617FF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0C07C18-0659-4815-AC04-BB551617FF27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

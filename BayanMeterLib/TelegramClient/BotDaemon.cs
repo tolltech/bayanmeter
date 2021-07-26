@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Tolltech.TelegramCore;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
