@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using Telegram.Bot;
-using Tolltech.BayanMeterLib.Helpers;
+using Tolltech.CoreLib.Helpers;
 
-namespace Tolltech.BayanMeterLib.TelegramClient
+namespace Tolltech.TelegramCore
 {
     public class TelegramClient : ITelegramClient
     {

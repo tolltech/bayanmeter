@@ -1,4 +1,4 @@
-﻿namespace Tolltech.BayanMeterLib.TelegramClient
+﻿namespace Tolltech.TelegramCore
 {
     public interface ITelegramClient
     {
