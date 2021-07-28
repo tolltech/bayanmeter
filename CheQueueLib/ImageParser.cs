@@ -14,7 +14,7 @@ namespace Tolltech.CheQueueLib
             Ocr.Configuration.EngineMode = TesseractEngineMode.LstmOnly;
             Ocr.Language = OcrLanguage.RussianFast;
 
-            using var Input = new OcrInput(@"img\Potter.tiff");
+            using var Input = new OcrInput(bytes);
             var Result = Ocr.Read(Input);
             return Result.Text;
         }
