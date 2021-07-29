@@ -1,4 +1,7 @@
-﻿using IronOcr;
+﻿using System.Drawing;
+using System.IO;
+using Patagames.Ocr;
+using Patagames.Ocr.Enums;
 
 namespace Tolltech.CheQueueLib
 {
@@ -6,17 +9,14 @@ namespace Tolltech.CheQueueLib
     {
         public string Parse(byte[] bytes)
         {
-            var Ocr = new IronTesseract();
-            // Configure for speed
-            Ocr.Configuration.BlackListCharacters = "~`$#^*_}{][|\\@";
-            Ocr.Configuration.PageSegmentationMode = TesseractPageSegmentationMode.Auto;
-            Ocr.Configuration.TesseractVersion = TesseractVersion.Tesseract5;
-            Ocr.Configuration.EngineMode = TesseractEngineMode.LstmOnly;
-            Ocr.Language = OcrLanguage.RussianFast;
+            using var api = OcrApi.Create();
 
-            using var Input = new OcrInput(bytes);
-            var Result = Ocr.Read(Input);
-            return Result.Text;
+            api.Init(new[] {Languages.Russian, Languages.English});
+
+            using var memoryStream = new MemoryStream(bytes);
+            using var bitMap = new Bitmap(memoryStream);
+            var plainText = api.GetTextFromImage(bitMap);
+            return plainText;
         }
     }
 }
