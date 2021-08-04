@@ -17,7 +17,7 @@ namespace BayanMeterCoreTest
         [Fact]
         public void TestGetHash()
         {
-            var inputFilePath = Path.Combine(WorkDirecoryPath, "Images", "test.jpg");
+            var inputFilePath = Path.Combine(WorkDirectoryPath, "Images", "test.jpg");
 
             Assert.True(File.Exists(inputFilePath));
 

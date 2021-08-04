@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using log4net;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -16,7 +17,8 @@ namespace Tolltech.CheQueueLib
 
         private static readonly ILog log = LogManager.GetLogger(typeof(CheQueueBotDaemon));
 
-        public CheQueueBotDaemon(TelegramBotClient client, ITelegramClient telegramClient, ISettings settings, IImageParser imageParser)
+        public CheQueueBotDaemon(TelegramBotClient client, ITelegramClient telegramClient, ISettings settings,
+            IImageParser imageParser)
         {
             this.client = client;
             this.telegramClient = telegramClient;
@@ -44,7 +46,7 @@ namespace Tolltech.CheQueueLib
                     return;
                 }
 
-                foreach (var photoSize in photoSizes)
+                foreach (var photoSize in photoSizes.OrderByDescending(x => x.Height * x.Width).Take(1))
                 {
                     var bytes = telegramClient.GetPhoto(photoSize.FileId);
 
@@ -59,12 +61,14 @@ namespace Tolltech.CheQueueLib
 
                     if (fromChatId == sendChatId)
                     {
-                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}", replyToMessageId: message.MessageId).GetAwaiter().GetResult();
+                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}",
+                            replyToMessageId: message.MessageId).GetAwaiter().GetResult();
                     }
                     else
                     {
                         client.ForwardMessageAsync(sendChatId, fromChatId, message.MessageId).GetAwaiter().GetResult();
-                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}").GetAwaiter().GetResult();
+                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}")
+                            .GetAwaiter().GetResult();
                     }
                 }
             }

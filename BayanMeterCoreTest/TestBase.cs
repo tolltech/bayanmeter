@@ -13,11 +13,11 @@ namespace BayanMeterCoreTest
     {
         protected readonly StandardKernel kernel;
 
-        protected string WorkDirecoryPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        protected string WorkDirectoryPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         protected TestBase()
         {
-            var argsFileName = Path.Combine(WorkDirecoryPath, "args.txt");
+            var argsFileName = Path.Combine(WorkDirectoryPath, "args.txt");
             var token = File.Exists(argsFileName)
                             ? File.ReadAllLines(argsFileName).FirstOrDefault()
                             : string.Empty;

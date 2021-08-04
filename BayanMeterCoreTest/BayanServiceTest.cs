@@ -24,7 +24,7 @@ namespace BayanMeterCoreTest
         [Fact]
         public void Simple()
         {
-            var inputFilePath = Path.Combine(WorkDirecoryPath, "Images", "test.jpg");
+            var inputFilePath = Path.Combine(WorkDirectoryPath, "Images", "test.jpg");
             var messageDto = new MessageDto
             {
                 StrId = Guid.NewGuid().ToString(),
@@ -58,7 +58,7 @@ namespace BayanMeterCoreTest
         [Fact]
         public void SimpleWithUpdate()
         {
-            var inputFilePath = Path.Combine(WorkDirecoryPath, "Images", "test.jpg");
+            var inputFilePath = Path.Combine(WorkDirectoryPath, "Images", "test.jpg");
             var messageDto = new MessageDto
             {
                 StrId = Guid.NewGuid().ToString(),

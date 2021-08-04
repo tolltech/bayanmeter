@@ -22,8 +22,8 @@ namespace BayanMeterCoreTest
         [InlineData(true, "test1", "test2")]
         public void TestHashEquals(bool expected, string left, string right)
         {
-            var leftPath = Path.Combine(WorkDirecoryPath, "Images", $"{left}.jpg");
-            var rightPath = Path.Combine(WorkDirecoryPath, "Images", $"{right}.jpg");
+            var leftPath = Path.Combine(WorkDirectoryPath, "Images", $"{left}.jpg");
+            var rightPath = Path.Combine(WorkDirectoryPath, "Images", $"{right}.jpg");
 
             Assert.True(File.Exists(leftPath));
             Assert.True(File.Exists(rightPath));
