@@ -38,6 +38,34 @@ namespace Tolltech.BayanMeterLib.Psql
                 .ToArray();
         }
 
+        private static readonly Random rnd = new Random();
+
+        [CanBeNull]
+        public MessageDbo GetRandom(long chatId, DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = dataContext.Table
+                .Where(x => x.ChatId == chatId);
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(x => x.MessageDate >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(x => x.MessageDate <= toDate.Value);
+            }
+
+            var count = query.Count();
+
+            var number = rnd.Next(count - 1);
+
+            return query
+                .OrderBy(x => x.MessageDate)
+                .Skip(number)
+                .FirstOrDefault();
+        }
+
         public void Update()
         {
             dataContext.SaveChanges();

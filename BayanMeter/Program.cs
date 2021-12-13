@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Ninject;
 using Telegram.Bot;
 using Tolltech.BayanMeter.Psql;
@@ -8,6 +9,7 @@ using Tolltech.BayanMeterLib;
 using Tolltech.Core;
 using Tolltech.PostgreEF.Integration;
 using Tolltech.TelegramCore;
+using Telegram.Bot.Extensions.Polling;
 
 namespace Tolltech.BayanMeter
 {
@@ -17,7 +19,7 @@ namespace Tolltech.BayanMeter
 
         static void Main(string[] args)
         {
-            Console.WriteLine($"Start BayanMeter {DateTime.Now}");
+            Console.WriteLine($"Start Memeasy {DateTime.Now}");
 
             var argsFileName = "args.txt";
             var token = args.FirstOrDefault()
@@ -41,19 +43,28 @@ namespace Tolltech.BayanMeter
             kernel.Rebind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
             kernel.Rebind<ISettings>().ToConstant(new Settings {SpecialForAnswersChatId = specialForAnswersChatId});
 
+            using var cts = new CancellationTokenSource();
+
+            var receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = { } // receive all update types
+            };
+
             var botDaemon = kernel.Get<IBotDaemon>();
-            try
-            {
-                client.OnMessage += botDaemon.BotOnMessageReceived;
-                client.OnMessageEdited += botDaemon.BotOnMessageReceived;
-                client.StartReceiving();
-                Console.ReadLine();
-            }
-            finally
-            {
-                client.StopReceiving();
-                Console.WriteLine($"End BayanMeter {DateTime.Now}");
-            }
+            client.StartReceiving(
+                botDaemon.HandleUpdateAsync,
+                botDaemon.HandleErrorAsync,
+                receiverOptions,
+                cancellationToken: cts.Token);
+
+            var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
+
+            Console.WriteLine($"Start listening for @{me.Username}");
+            Console.ReadLine();
+
+            cts.Cancel();
+
+            Console.WriteLine($"End Memeasy {DateTime.Now}");
         }
     }
 }

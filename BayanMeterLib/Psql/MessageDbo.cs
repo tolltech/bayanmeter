@@ -22,14 +22,14 @@ namespace Tolltech.BayanMeterLib.Psql
         [Column("edit_date", TypeName = "timestamp")]
         public DateTime? EditDate { get; set; }
 
-        [Column("forward_from_message_id", TypeName = "int"), Required]
-        public int ForwardFromMessageId { get; set; }
+        [Column("forward_from_message_id", TypeName = "bigint"), Required]
+        public long ForwardFromMessageId { get; set; }
 
-        [Column("from_user_id", TypeName = "int"), Required]
-        public int FromUserId { get; set; }
+        [Column("from_user_id", TypeName = "bigint"), Required]
+        public long FromUserId { get; set; }
 
-        [Column("forward_from_user_id", TypeName = "int")]
-        public int? ForwardFromUserId { get; set; }
+        [Column("forward_from_user_id", TypeName = "bigint")]
+        public long? ForwardFromUserId { get; set; }
 
         [Column("create_date", TypeName = "timestamp"), Required]
         public DateTime CreateDate { get; set; }
