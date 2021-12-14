@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using log4net;
 using Telegram.Bot;
-using Telegram.Bot.Args;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Tolltech.TelegramCore;
 
@@ -26,15 +28,26 @@ namespace Tolltech.CheQueueLib
             this.imageParser = imageParser;
         }
 
-        public void BotOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
+        public Task HandleErrorAsync(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+            //throw new NotImplementedException();
+        }
+
+        public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
         {
             try
             {
-                var message = messageEventArgs.Message;
+                if (update.Type != UpdateType.Message)
+                {
+                    return;
+                }
 
-                log.Info($"RecieveMessage {message.Chat.Id} {message.MessageId}");
+                var message = update.Message;
 
-                if (message.Type != MessageType.Photo)
+                log.Info($"RecieveMessage {message?.Chat.Id} {message?.MessageId}");
+
+                if (message?.Type != MessageType.Photo)
                 {
                     return;
                 }
@@ -61,22 +74,20 @@ namespace Tolltech.CheQueueLib
 
                     if (fromChatId == sendChatId)
                     {
-                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}",
-                            replyToMessageId: message.MessageId).GetAwaiter().GetResult();
+                        await client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}", replyToMessageId: message.MessageId, cancellationToken: cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
-                        client.ForwardMessageAsync(sendChatId, fromChatId, message.MessageId).GetAwaiter().GetResult();
-                        client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}")
-                            .GetAwaiter().GetResult();
+                        await client.ForwardMessageAsync(sendChatId, fromChatId, message.MessageId, cancellationToken: cancellationToken).ConfigureAwait(false);
+                        await client.SendTextMessageAsync(sendChatId, $"Get jpeg {bytes.Length} bytes and \r\n{text}", cancellationToken: cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
             catch (Exception e)
             {
-                log.Error("CheQueueBotDaemon", e);
-                Console.WriteLine($"CheQueueBotDaemon: {e.Message} {e.StackTrace}");
+                log.Error("CheQueueBotDaemon: " , e);
             }
+
         }
     }
 }

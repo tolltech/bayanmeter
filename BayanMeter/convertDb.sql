@@ -32,3 +32,8 @@ ALTER TABLE messages ADD COLUMN IF NOT EXISTS previous_message_id int null;
 
 ALTER TABLE messages ALTER COLUMN edit_date DROP NOT NULL;
 --ALTER TABLE ImportResults ADD COLUMN IF NOT EXISTS candidatealbumid varchar NULL;
+
+ALTER TABLE messages ALTER COLUMN forward_from_message_id TYPE BIGINT;
+ALTER TABLE messages ALTER COLUMN from_user_id TYPE BIGINT;
+ALTER TABLE messages ALTER COLUMN forward_from_user_id TYPE BIGINT;
+ALTER TABLE messages ALTER COLUMN forward_from_user_id DROP NOT NULL;

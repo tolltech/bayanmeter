@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29519.181
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayanMeter", "BayanMeter\BayanMeter.csproj", "{14F709AC-A2E7-443F-B7AE-CE65B33C989F}"
 EndProject
@@ -17,15 +17,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostgreEF", "PostgreEF\Post
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration", "Migration\Migration.csproj", "{962D798C-736D-4DB6-BB98-54F47B472F72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueue", "CheQueue\CheQueue.csproj", "{18D94217-A981-4CFE-8A51-8AD48D54C73D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheQueue", "CheQueue\CheQueue.csproj", "{18D94217-A981-4CFE-8A51-8AD48D54C73D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramCore", "TelegramCore\TelegramCore.csproj", "{19306443-5F2E-4DCF-9809-6DB688185970}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramCore", "TelegramCore\TelegramCore.csproj", "{19306443-5F2E-4DCF-9809-6DB688185970}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueueTest", "CheQueueTest\CheQueueTest.csproj", "{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheQueueTest", "CheQueueTest\CheQueueTest.csproj", "{E388C5D2-E86D-40CB-A8DC-25039CCC8C3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheQueueLib", "CheQueueLib\CheQueueLib.csproj", "{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheQueueLib", "CheQueueLib\CheQueueLib.csproj", "{C589C515-1C1F-414E-B6ED-3D3ACCC4D320}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreLib", "CoreLib\CoreLib.csproj", "{B0C07C18-0659-4815-AC04-BB551617FF27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreLib", "CoreLib\CoreLib.csproj", "{B0C07C18-0659-4815-AC04-BB551617FF27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DummyProject", "DummyProject\DummyProject.csproj", "{B3B6DD37-1893-41AC-9411-A61A54BA263C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{B0C07C18-0659-4815-AC04-BB551617FF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0C07C18-0659-4815-AC04-BB551617FF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0C07C18-0659-4815-AC04-BB551617FF27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
