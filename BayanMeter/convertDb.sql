@@ -37,3 +37,20 @@ ALTER TABLE messages ALTER COLUMN forward_from_message_id TYPE BIGINT;
 ALTER TABLE messages ALTER COLUMN from_user_id TYPE BIGINT;
 ALTER TABLE messages ALTER COLUMN forward_from_user_id TYPE BIGINT;
 ALTER TABLE messages ALTER COLUMN forward_from_user_id DROP NOT NULL;
+
+CREATE TABLE IF NOT EXISTS 
+moira_alerts
+(
+str_id varchar not null primary key,
+chat_id bigint not null,
+text varchar null,
+int_id int not null,
+message_date timestamp not null,
+timestamp bigint not null,
+alert_status varchar null,
+alert_name varchar null,
+alert_text varchar null,
+alert_id varchar null
+);
+
+CREATE INDEX IF NOT EXISTS moira_alerts_timestamp_chatId on moira_alerts (timestamp, chat_id);

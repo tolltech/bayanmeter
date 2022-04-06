@@ -11,21 +11,18 @@ using Tolltech.TelegramCore;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
-    public class BotDaemon : IBotDaemon
+    public class EasyMemeBotDaemon : IBotDaemon
     {
         private readonly ITelegramClient telegramClient;
         private readonly IImageBayanService imageBayanService;
-        private readonly ISettings settings;
         private readonly IMemEasyService memEasyService;
 
-        private static readonly ILog log = LogManager.GetLogger(typeof(BotDaemon));
+        private static readonly ILog log = LogManager.GetLogger(typeof(EasyMemeBotDaemon));
 
-        public BotDaemon(ITelegramClient telegramClient, IImageBayanService imageBayanService,
-            ISettings settings, IMemEasyService memEasyService)
+        public EasyMemeBotDaemon(ITelegramClient telegramClient, IImageBayanService imageBayanService, IMemEasyService memEasyService)
         {
             this.telegramClient = telegramClient;
             this.imageBayanService = imageBayanService;
-            this.settings = settings;
             this.memEasyService = memEasyService;
         }
 

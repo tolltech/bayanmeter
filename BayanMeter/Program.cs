@@ -1,70 +1,93 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
+using Newtonsoft.Json;
 using Ninject;
 using Telegram.Bot;
 using Tolltech.BayanMeter.Psql;
-using Tolltech.BayanMeterLib;
 using Tolltech.Core;
 using Tolltech.PostgreEF.Integration;
 using Tolltech.TelegramCore;
 using Telegram.Bot.Extensions.Polling;
+using Tolltech.BayanMeterLib.TelegramClient;
+using Tolltech.KonturPaymentsLib;
 
 namespace Tolltech.BayanMeter
 {
     class Program
     {
+        class AppSettings
+        {
+            public string ConnectionString { get; set; }
+            public BotSettings[] BotSettings { get; set; }
+        }
+        
+        class BotSettings
+        {
+            public string Token { get; set; }
+            public string BotName { get; set; }
+        }
+
         private static TelegramBotClient client;
 
         static void Main(string[] args)
         {
-            Console.WriteLine($"Start Memeasy {DateTime.Now}");
+            Console.WriteLine($"Start Bots {DateTime.Now}");
 
             var argsFileName = "args.txt";
-            var token = args.FirstOrDefault()
-                        ?? (File.Exists(argsFileName)
-                            ? File.ReadAllLines(argsFileName).FirstOrDefault()
-                            : string.Empty);
+            var botSettingsStr = args.Length > 0 ? args[0] :
+                File.Exists(argsFileName) ? File.ReadAllText(argsFileName) : string.Empty;
 
-            var connectionString = args.Skip(1).FirstOrDefault()
-                        ?? (File.Exists(argsFileName)
-                            ? File.ReadAllLines(argsFileName).Skip(1).FirstOrDefault()
-                            : string.Empty);
-
-            var specialForAnswersChatId = args.Skip(2).FirstOrDefault()
-                                   ?? (File.Exists(argsFileName)
-                                       ? File.ReadAllLines(argsFileName).Skip(2).FirstOrDefault()
-                                       : string.Empty);
+            var appSettings = JsonConvert.DeserializeObject<AppSettings>(botSettingsStr);
 
             var kernel = new StandardKernel(new ConfigurationModule("log4net.config"));
-            client = new TelegramBotClient(token);
-            kernel.Bind<TelegramBotClient>().ToConstant(client);
+            var connectionString = appSettings?.ConnectionString;
+
+            Console.WriteLine($"Read {connectionString} connectionString");
+
             kernel.Rebind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
-            kernel.Rebind<ISettings>().ToConstant(new Settings {SpecialForAnswersChatId = specialForAnswersChatId});
+
+            var botSettings = appSettings?.BotSettings ?? Array.Empty<BotSettings>();
+            Console.WriteLine($"Read {botSettings.Length} bot settings");
+
+            kernel.Unbind<IBotDaemon>();
+            kernel.Bind<IBotDaemon>().To<EasyMemeBotDaemon>().Named("EasyMeme");
+            kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named("KonturPayments");
 
             using var cts = new CancellationTokenSource();
 
-            var receiverOptions = new ReceiverOptions
+            foreach (var botSetting in botSettings)
             {
-                AllowedUpdates = { } // receive all update types
-            };
+                var token = botSetting.Token;
+             
+                Console.WriteLine($"Start bot {token}");
 
-            var botDaemon = kernel.Get<IBotDaemon>();
-            client.StartReceiving(
-                botDaemon.HandleUpdateAsync,
-                botDaemon.HandleErrorAsync,
-                receiverOptions,
-                cancellationToken: cts.Token);
+                client = new TelegramBotClient(token);
 
-            var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
+                var receiverOptions = new ReceiverOptions
+                {
+                    AllowedUpdates = { } // receive all update types
+                };
 
-            Console.WriteLine($"Start listening for @{me.Username}");
+                kernel.Bind<TelegramBotClient>().ToConstant(client).WhenAnyAncestorNamed(botSetting.BotName);
+
+                var botDaemon = kernel.Get<IBotDaemon>(botSetting.BotName);
+                client.StartReceiving(
+                    botDaemon.HandleUpdateAsync,
+                    botDaemon.HandleErrorAsync,
+                    receiverOptions,
+                    cancellationToken: cts.Token);
+
+                var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
+
+                Console.WriteLine($"Start listening for @{me.Username}");
+            }
+
             Console.ReadLine();
 
             cts.Cancel();
 
-            Console.WriteLine($"End Memeasy {DateTime.Now}");
+            Console.WriteLine($"End Bots {DateTime.Now}");
         }
     }
 }
