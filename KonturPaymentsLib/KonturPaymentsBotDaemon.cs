@@ -36,6 +36,8 @@ namespace Tolltech.KonturPaymentsLib
 
         private async Task OnTimedEvent()
         {
+            Console.WriteLine($"BotDaemon: Timer {DateTime.UtcNow} chatIds {string.Join(",", chatIds.Distinct())}");
+
             if (DateTime.UtcNow.Hour != 14)
             {
                 return;
@@ -101,15 +103,14 @@ namespace Tolltech.KonturPaymentsLib
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var alerts = queryExecutor.Execute(f => f.Select(DateTime.UtcNow.AddDays(-dayCount).Ticks, chatId));
 
-            var message = "```" + string.Join("\r\n",
+            var message = string.Join("\r\n",
                               new[] { "Name;Status;Count;Url" }
                                   .Concat(
                                       alerts.GroupBy(x => (x.AlertId, x.AlertStatus))
                                           .Where(x => x.Key.AlertStatus.Trim().ToLower() != "ok")
                                           .OrderByDescending(x => x.Count())
                                           .Select(x =>
-                                              $"{x.First().AlertName};{x.Key.AlertStatus};{x.Count()};[{x.Key.AlertId}](https://moira.skbkontur.ru/trigger/{x.Key.AlertId})"))) +
-                          "```";
+                                              $"{x.First().AlertName};{x.Key.AlertStatus};{x.Count()};[{x.Key.AlertId}](https://moira.skbkontur.ru/trigger/{x.Key.AlertId})")));
 
             return client.SendTextMessageAsync(chatId, message, ParseMode.Markdown);
         }
