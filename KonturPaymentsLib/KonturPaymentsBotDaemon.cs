@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +17,34 @@ namespace Tolltech.KonturPaymentsLib
     public class KonturPaymentsBotDaemon : IBotDaemon
     {
         private readonly IQueryExecutorFactory queryExecutorFactory;
+        private readonly TelegramBotClient telegramBotClient;
         private static readonly ILog log = LogManager.GetLogger(typeof(KonturPaymentsBotDaemon));
 
-        public KonturPaymentsBotDaemon(IQueryExecutorFactory queryExecutorFactory)
+        private readonly System.Timers.Timer timer;
+        private static readonly ConcurrentBag<long> chatIds = new ConcurrentBag<long>();
+
+        public KonturPaymentsBotDaemon(IQueryExecutorFactory queryExecutorFactory, TelegramBotClient telegramBotClient)
         {
             this.queryExecutorFactory = queryExecutorFactory;
+            this.telegramBotClient = telegramBotClient;
+            timer = new System.Timers.Timer(TimeSpan.FromHours(1).TotalMilliseconds);
+
+            timer.Elapsed += async ( sender, e ) => await OnTimedEvent().ConfigureAwait(false);
+            timer.AutoReset = true;
+            timer.Enabled = true;
+        }
+
+        private async Task OnTimedEvent()
+        {
+            if (DateTime.UtcNow.Hour != 14)
+            {
+                return;
+            }
+
+            foreach (var chatId in chatIds.Distinct())
+            {
+                await SendReportAsync(telegramBotClient, chatId, 1).ConfigureAwait(false);
+            }
         }
 
         public Task HandleErrorAsync(ITelegramBotClient client, Exception exception,
@@ -55,6 +79,8 @@ namespace Tolltech.KonturPaymentsLib
 
                 log.Info($"RecieveMessage {message.Chat.Id} {message.MessageId}");
 
+                chatIds.Add(message.Chat.Id);
+
                 await SaveMessageIfAlertAsync(message).ConfigureAwait(false);
 
                 if (message.Text.StartsWith(@"/stats"))
@@ -76,11 +102,14 @@ namespace Tolltech.KonturPaymentsLib
             var alerts = queryExecutor.Execute(f => f.Select(DateTime.UtcNow.AddDays(-dayCount).Ticks, chatId));
 
             var message = "```" + string.Join("\r\n",
-                new[] { "Id;Name;Status;Count" }
-                    .Concat(
-                        alerts.GroupBy(x => (x.AlertId, x.AlertStatus))
-                            .Select(x =>
-                                $"{x.Key.AlertId};{x.First().AlertName};{x.Key.AlertStatus};{x.Count()}"))) + "```";
+                              new[] { "Name;Status;Count;Url" }
+                                  .Concat(
+                                      alerts.GroupBy(x => (x.AlertId, x.AlertStatus))
+                                          .Where(x => x.Key.AlertStatus.Trim().ToLower() != "ok")
+                                          .OrderByDescending(x => x.Count())
+                                          .Select(x =>
+                                              $"{x.First().AlertName};{x.Key.AlertStatus};{x.Count()};[{x.Key.AlertId}](https://moira.skbkontur.ru/trigger/{x.Key.AlertId})"))) +
+                          "```";
 
             return client.SendTextMessageAsync(chatId, message, ParseMode.Markdown);
         }
