@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,33 +21,39 @@ namespace Tolltech.KonturPaymentsLib
         private readonly TelegramBotClient telegramBotClient;
         private static readonly ILog log = LogManager.GetLogger(typeof(KonturPaymentsBotDaemon));
 
-        private readonly System.Timers.Timer timer;
-        private static readonly ConcurrentBag<long> chatIds = new ConcurrentBag<long>();
+        private static System.Timers.Timer timer;
+        private static readonly HashSet<long> chatIds = new HashSet<long>();
+
+        private static readonly ConcurrentDictionary<DateTime, int> timerDates =
+            new ConcurrentDictionary<DateTime, int>();
 
         public KonturPaymentsBotDaemon(IQueryExecutorFactory queryExecutorFactory, TelegramBotClient telegramBotClient)
         {
             this.queryExecutorFactory = queryExecutorFactory;
             this.telegramBotClient = telegramBotClient;
-            timer = new System.Timers.Timer(TimeSpan.FromHours(1).TotalMilliseconds);
-
-            timer.Elapsed += async ( sender, e ) => await OnTimedEvent().ConfigureAwait(false);
-            timer.AutoReset = true;
-            timer.Enabled = true;
         }
 
-        private async Task OnTimedEvent()
+        private void OnTimedEvent()
         {
-            Console.WriteLine($"BotDaemon: Timer {DateTime.UtcNow} chatIds {string.Join(",", chatIds.Distinct())}");
+            var utcNow = DateTime.UtcNow;
+            Console.WriteLine($"BotDaemon: Timer {utcNow} chatIds {string.Join(",", chatIds.Distinct())}");
 
-            if (DateTime.UtcNow.Hour != 14)
+            if (timerDates.ContainsKey(utcNow.Date))
+            {
+                return;
+            }
+
+            if (utcNow.Hour != 14)
             {
                 return;
             }
 
             foreach (var chatId in chatIds.Distinct())
             {
-                await SendReportAsync(telegramBotClient, chatId, 1).ConfigureAwait(false);
+                SendReportAsync(telegramBotClient, chatId, 1).GetAwaiter().GetResult();
             }
+
+            timerDates.AddOrUpdate(utcNow.Date, time => 1, (time, i) => i + 1);
         }
 
         public Task HandleErrorAsync(ITelegramBotClient client, Exception exception,
@@ -82,6 +89,15 @@ namespace Tolltech.KonturPaymentsLib
                 log.Info($"RecieveMessage {message.Chat.Id} {message.MessageId}");
 
                 chatIds.Add(message.Chat.Id);
+
+                if (timer == null)
+                {
+                    timer = new System.Timers.Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+
+                    timer.Elapsed += (sender, e) => OnTimedEvent();
+                    timer.AutoReset = true;
+                    timer.Enabled = true;
+                }
 
                 await SaveMessageIfAlertAsync(message).ConfigureAwait(false);
 
