@@ -122,7 +122,11 @@ namespace Tolltech.KonturPaymentsLib
                     timer.Enabled = true;
                 }
 
-                await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
+                var result =  await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
+
+                await client.SendTextMessageAsync(message.Chat.Id,
+                        $"```Total {result.Total}, New {result.Total - result.Deleted}```", ParseMode.Markdown, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -148,15 +152,15 @@ namespace Tolltech.KonturPaymentsLib
             return client.SendTextMessageAsync(chatId, message, ParseMode.Markdown);
         }
 
-        private Task SaveMessageIfAlertAsync([NotNull] ChatDto chatHistory, long chatId)
+        private Task<(int Deleted, int Total)> SaveMessageIfAlertAsync([NotNull] ChatDto chatHistory, long chatId)
         {
             var alerts = GetAlerts(chatHistory.Messages, chatId).ToArray();
 
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
 
-            queryExecutor.Execute(f => f.Delete(alerts.Select(x => x.StrId).ToArray()));
+            var deletedCount = queryExecutor.Execute(f => f.Delete(alerts.Select(x => x.StrId).ToArray()));
             queryExecutor.Execute(f => f.Create(alerts));
-            return Task.CompletedTask;
+            return Task.FromResult((deletedCount, alerts.Length));
         }
 
         private IEnumerable<MoiraAlertDbo> GetAlerts(MessageDto[] messages, long chatId)

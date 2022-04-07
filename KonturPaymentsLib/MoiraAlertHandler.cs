@@ -14,13 +14,14 @@ namespace Tolltech.KonturPaymentsLib
             this.dataContext = dataContext;
         }
 
-        public void Delete(string[] ids)
+        public int Delete(string[] ids)
         {
             var toDelete =  dataContext.Table
                 .Where(x => ids.Contains(x.StrId))
                 .ToArray();
 
             dataContext.Delete(toDelete);
+            return toDelete.Length;
         }
 
         public void Create([NotNull] [ItemNotNull] params MoiraAlertDbo[] alerts)
