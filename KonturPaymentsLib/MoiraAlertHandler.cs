@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using JetBrains.Annotations;
 using Tolltech.SqlEF;
 using Tolltech.SqlEF.Integration;
@@ -16,7 +17,7 @@ namespace Tolltech.KonturPaymentsLib
 
         public int Delete(string[] ids)
         {
-            var toDelete =  dataContext.Table
+            var toDelete = dataContext.Table
                 .Where(x => ids.Contains(x.StrId))
                 .ToArray();
 
@@ -31,8 +32,9 @@ namespace Tolltech.KonturPaymentsLib
 
         public MoiraAlertDbo[] Select(long exclusiveFromUtcTicks, long chatId)
         {
+            var from = new DateTime(exclusiveFromUtcTicks);
             return dataContext.Table
-                .Where(x => x.Timestamp > exclusiveFromUtcTicks)
+                .Where(x => x.MessageDate > from)
                 .Where(x => x.ChatId == chatId)
                 .ToArray();
         }

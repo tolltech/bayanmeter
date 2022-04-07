@@ -95,7 +95,7 @@ namespace Tolltech.KonturPaymentsLib
 
                 if (message.Text?.StartsWith(@"/stats") ?? false)
                 {
-                    var dayCount = int.TryParse(message.Text.Replace(@"/stats", string.Empty), out var d) ? d : 1;
+                    var dayCount = int.TryParse(message.Text.Replace(@"/stats", string.Empty).Trim(), out var d) ? d : 1;
                     await SendReportAsync(client, message.Chat.Id, dayCount).ConfigureAwait(false);
                     return;
                 }
