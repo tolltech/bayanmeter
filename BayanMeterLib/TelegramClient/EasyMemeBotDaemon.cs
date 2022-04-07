@@ -90,7 +90,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 return Task.CompletedTask;
             }
 
-            var bytes = telegramClient.GetPhoto(photoSize.FileId);
+            var bytes = telegramClient.GetFile(photoSize.FileId);
 
             var messageDto = Convert(message, bytes);
             imageBayanService.SaveMessage(messageDto);

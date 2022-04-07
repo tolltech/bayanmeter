@@ -61,7 +61,7 @@ namespace Tolltech.CheQueueLib
 
                 foreach (var photoSize in photoSizes.OrderByDescending(x => x.Height * x.Width).Take(1))
                 {
-                    var bytes = telegramClient.GetPhoto(photoSize.FileId);
+                    var bytes = telegramClient.GetFile(photoSize.FileId);
 
                     var text = imageParser.Parse(bytes);
 

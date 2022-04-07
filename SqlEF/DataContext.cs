@@ -25,6 +25,12 @@ namespace Tolltech.SqlEF
             Table.RemoveRange(data);
             return SaveChangesAsync();
         }
+        
+        public void Delete(params T[] data)
+        {
+            Table.RemoveRange(data);
+            SaveChanges();
+        }
 
         public Task UpdateAsync()
         {

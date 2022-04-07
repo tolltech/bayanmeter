@@ -13,7 +13,7 @@ namespace Tolltech.TelegramCore
             this.client = client;
         }
 
-        public byte[] GetPhoto(string fileId)
+        public byte[] GetFile(string fileId)
         {
             using (var stream = new MemoryStream())
             {

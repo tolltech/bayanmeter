@@ -2,6 +2,6 @@
 {
     public interface ITelegramClient
     {
-        byte[] GetPhoto(string fileId);
+        byte[] GetFile(string fileId);
     }
 }
