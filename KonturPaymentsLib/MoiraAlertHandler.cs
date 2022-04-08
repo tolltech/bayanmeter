@@ -30,13 +30,20 @@ namespace Tolltech.KonturPaymentsLib
             dataContext.Table.AddRange(alerts);
         }
 
-        public MoiraAlertDbo[] Select(long exclusiveFromUtcTicks, long chatId)
+        public MoiraAlertDbo[] Select(long exclusiveFromUtcTicks, long chatId, long? exclusiveToTicks = null)
         {
             var from = new DateTime(exclusiveFromUtcTicks);
-            return dataContext.Table
+            var query = dataContext.Table
                 .Where(x => x.MessageDate > from)
-                .Where(x => x.ChatId == chatId)
-                .ToArray();
+                .Where(x => x.ChatId == chatId);
+
+            if (exclusiveToTicks.HasValue)
+            {
+                var exclusiveToDate = new DateTime(exclusiveToTicks.Value);
+                query = query.Where(x => x.MessageDate < exclusiveToDate);
+            }
+
+            return query.ToArray();
         }
     }
 }

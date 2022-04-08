@@ -56,7 +56,7 @@ namespace Tolltech.KonturPaymentsLib
 
             foreach (var chatId in chatIds.Distinct())
             {
-                SendReportAsync(telegramBotClient, chatId, 1).GetAwaiter().GetResult();
+                SendStatsReportAsync(telegramBotClient, chatId, 1).GetAwaiter().GetResult();
             }
 
             timerDates.AddOrUpdate(utcNow.Date, time => 1, (time, i) => i + 1);
@@ -95,8 +95,16 @@ namespace Tolltech.KonturPaymentsLib
 
                 if (message.Text?.StartsWith(@"/stats") ?? false)
                 {
-                    var dayCount = int.TryParse(message.Text.Replace(@"/stats", string.Empty).Trim(), out var d) ? d : 1;
-                    await SendReportAsync(client, message.Chat.Id, dayCount).ConfigureAwait(false);
+                    var dayCount = int.TryParse(message.Text.Replace(@"/stats", string.Empty).Trim(), out var d)
+                        ? d
+                        : 1;
+                    await SendStatsReportAsync(client, message.Chat.Id, dayCount).ConfigureAwait(false);
+                    return;
+                }
+
+                if (message.Text?.StartsWith(@"/diff") ?? false)
+                {
+                    await SendDiffReportAsync(client, message.Chat.Id).ConfigureAwait(false);
                     return;
                 }
 
@@ -122,10 +130,11 @@ namespace Tolltech.KonturPaymentsLib
                     timer.Enabled = true;
                 }
 
-                var result =  await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
+                var result = await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
 
                 await client.SendTextMessageAsync(message.Chat.Id,
-                        $"```Total {result.Total}, New {result.Total - result.Deleted}```", ParseMode.Markdown, cancellationToken: cancellationToken)
+                        $"```Total {result.Total}, New {result.Total - result.Deleted}```", ParseMode.Markdown,
+                        cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (Exception e)
@@ -135,8 +144,40 @@ namespace Tolltech.KonturPaymentsLib
             }
         }
 
-        private Task SendReportAsync(ITelegramBotClient client, long chatId, int dayCount)
+        private Task SendDiffReportAsync(ITelegramBotClient client, long chatId)
         {
+            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
+            var today = DateTime.Now.Date;
+            var yesterday = DateTime.Now.Date.AddDays(-1);
+            var todayAlerts = queryExecutor.Execute(f => f.Select(today.Ticks, chatId));
+            var yesterdayAlerts = queryExecutor.Execute(f => f.Select(yesterday.Ticks, chatId, today.Ticks));
+
+            Console.WriteLine($"diff from {yesterday} to {today}. {yesterdayAlerts.Length} {todayAlerts.Length}");
+
+            var sb = new StringBuilder();
+            sb.AppendLine("```");
+            sb.AppendLine(
+                $"Yesterday - Ok {yesterdayAlerts.Count(x => x.AlertStatus.ToLower() == "ok")} NotOk {yesterdayAlerts.Count(x => x.AlertStatus.ToLower() != "ok")}");
+            sb.AppendLine(
+                $"Today - Ok {todayAlerts.Count(x => x.AlertStatus.ToLower() == "ok")} NotOk {todayAlerts.Count(x => x.AlertStatus.ToLower() != "ok")}");
+            sb.AppendLine("```");
+
+            var yesterdayAlertIds = new HashSet<string>(yesterdayAlerts.Select(x => x.AlertId));
+            var newTodayAlerts = todayAlerts.Where(x => !yesterdayAlertIds.Contains(x.AlertId)).GroupBy(x => x.AlertId);
+            sb.AppendLine($"New - {todayAlerts.GroupBy(x => x.AlertId).Count()}");
+
+            foreach (var alert in newTodayAlerts.OrderByDescending(x=>x.Count()))
+            {
+                sb.AppendLine($"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
+            }
+
+            return client.SendTextMessageAsync(chatId, sb.ToString(), ParseMode.Markdown);
+        }
+
+        private Task SendStatsReportAsync(ITelegramBotClient client, long chatId, int dayCount)
+        {
+            Console.WriteLine($"Send stats for {chatId} days {dayCount}");
+
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var alerts = queryExecutor.Execute(f => f.Select(DateTime.UtcNow.AddDays(-dayCount).Ticks, chatId));
 
