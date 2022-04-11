@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -104,18 +105,22 @@ namespace Tolltech.KonturPaymentsLib
 
                 if (message.Text?.StartsWith(@"/diff") ?? false)
                 {
-                    await SendDiffReportAsync(client, message.Chat.Id).ConfigureAwait(false);
+                    var fromDate = DateTime.TryParseExact(message.Text.Replace(@"/diff", string.Empty).Trim(),
+                        "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
+                        ? d
+                        : DateTime.Now.Date.AddDays(-1);
+                    await SendDiffReportAsync(client, message.Chat.Id, fromDate).ConfigureAwait(false);
                     return;
                 }
 
-                var documment = message.Document;
+                var document = message.Document;
 
-                if (documment == null || string.IsNullOrWhiteSpace(documment.FileId))
+                if (document == null || string.IsNullOrWhiteSpace(document.FileId))
                 {
                     return;
                 }
 
-                var file = telegramClient.GetFile(documment.FileId);
+                var file = telegramClient.GetFile(document.FileId);
 
                 var chatHistory = JsonConvert.DeserializeObject<ChatDto>(Encoding.UTF8.GetString(file));
 
@@ -144,15 +149,14 @@ namespace Tolltech.KonturPaymentsLib
             }
         }
 
-        private Task SendDiffReportAsync(ITelegramBotClient client, long chatId)
+        private Task SendDiffReportAsync(ITelegramBotClient client, long chatId, DateTime fromDate)
         {
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var today = DateTime.Now.Date;
-            var yesterday = DateTime.Now.Date.AddDays(-1);
             var todayAlerts = queryExecutor.Execute(f => f.Select(today.Ticks, chatId));
-            var yesterdayAlerts = queryExecutor.Execute(f => f.Select(yesterday.Ticks, chatId, today.Ticks));
+            var yesterdayAlerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId, today.Ticks));
 
-            Console.WriteLine($"diff from {yesterday} to {today}. {yesterdayAlerts.Length} {todayAlerts.Length}");
+            Console.WriteLine($"diff from {fromDate} to {today}. {yesterdayAlerts.Length} {todayAlerts.Length}");
 
             var sb = new StringBuilder();
             sb.AppendLine("```");
@@ -163,10 +167,18 @@ namespace Tolltech.KonturPaymentsLib
             sb.AppendLine("```");
 
             var yesterdayAlertIds = new HashSet<string>(yesterdayAlerts.Select(x => x.AlertId));
-            var newTodayAlerts = todayAlerts.Where(x => !yesterdayAlertIds.Contains(x.AlertId)).GroupBy(x => x.AlertId);
-            sb.AppendLine($"New - {todayAlerts.GroupBy(x => x.AlertId).Count()}");
+            var newTodayAlerts = todayAlerts.Where(x => !yesterdayAlertIds.Contains(x.AlertId)).GroupBy(x => x.AlertId).ToArray();
+            sb.AppendLine($"New - {newTodayAlerts.Length}");
 
             foreach (var alert in newTodayAlerts.OrderByDescending(x=>x.Count()))
+            {
+                sb.AppendLine($"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
+            }
+
+            var todayNotOkAlertIds = new HashSet<string>(todayAlerts.Where(x => x.AlertStatus.ToLower() != "ok").Select(x => x.AlertId));
+            var repairedAlerts = yesterdayAlerts.Where(x => !todayNotOkAlertIds.Contains(x.AlertId)).GroupBy(x=>x.AlertId).ToArray();
+            sb.AppendLine($"Repaired - {repairedAlerts.Length}");
+            foreach (var alert in repairedAlerts.OrderByDescending(x=>x.Count()))
             {
                 sb.AppendLine($"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
             }
