@@ -172,7 +172,7 @@ namespace Tolltech.KonturPaymentsLib
             var diff = DateTime.UtcNow - lastTimestampDate;
 
             await client.SendTextMessageAsync(message.Chat.Id,
-                    $"``` {(diff.TotalHours >= 4 ? "ATTENTION " : string.Empty)}Last HistoryUpload was {lastTimestampDate} UTC ({diff.TotalHours} hours ago) ```",
+                    $"``` {(diff.TotalHours >= 4 ? "ATTENTION " : string.Empty)}Last HistoryUpload was {lastTimestampDate:yyyy-MM-dd hh:mm} UTC ({(int)diff.TotalHours} hours ago) ```",
                     ParseMode.Markdown,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -261,7 +261,7 @@ namespace Tolltech.KonturPaymentsLib
             Console.WriteLine($"Send stats for {chatId} days {dayCount}");
 
             var fromDate = DateTime.UtcNow.AddDays(-dayCount);
-            await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:s} ```", ParseMode.Markdown)
+            await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:yyyy-MM-dd hh:mm} ```", ParseMode.Markdown)
                 .ConfigureAwait(false);
 
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
