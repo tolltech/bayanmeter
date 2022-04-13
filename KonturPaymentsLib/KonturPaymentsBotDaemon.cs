@@ -94,13 +94,16 @@ namespace Tolltech.KonturPaymentsLib
 
                 log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
+                await ParseAndSaveHistory(client, cancellationToken, message).ConfigureAwait(false);
+
+                await SendLastHistoryUploadInfo(client, cancellationToken, message).ConfigureAwait(false);
+
                 if (message.Text?.StartsWith(@"/stats") ?? false)
                 {
                     var dayCount = int.TryParse(message.Text.Replace(@"/stats", string.Empty).Trim(), out var d)
                         ? d
                         : 1;
                     await SendStatsReportAsync(client, message.Chat.Id, dayCount).ConfigureAwait(false);
-                    return;
                 }
 
                 if (message.Text?.StartsWith(@"/diff") ?? false)
@@ -119,37 +122,18 @@ namespace Tolltech.KonturPaymentsLib
                         : DateTime.Now.Date;
 
                     await SendDiffReportAsync(client, message.Chat.Id, fromDate, toDate).ConfigureAwait(false);
-                    return;
                 }
 
-                var document = message.Document;
-
-                if (document == null || string.IsNullOrWhiteSpace(document.FileId))
+                if (message.Text?.StartsWith(@"/check") ?? false)
                 {
-                    return;
+                    var alertId = Guid.TryParse(message.Text.Replace(@"/check", string.Empty).Trim(), out var g)
+                        ? g
+                        : (Guid?)null;
+
+                    var alertName = message.Text.Replace(@"/check", string.Empty).Trim();
+
+                    await SendCheckReportAsync(client, message.Chat.Id, alertId, alertName).ConfigureAwait(false);
                 }
-
-                var file = telegramClient.GetFile(document.FileId);
-
-                var chatHistory = JsonConvert.DeserializeObject<ChatDto>(Encoding.UTF8.GetString(file));
-
-                chatIds.Add(message.Chat.Id);
-
-                if (timer == null)
-                {
-                    timer = new System.Timers.Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
-
-                    timer.Elapsed += (sender, e) => OnTimedEvent();
-                    timer.AutoReset = true;
-                    timer.Enabled = true;
-                }
-
-                var result = await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
-
-                await client.SendTextMessageAsync(message.Chat.Id,
-                        $"``` Total {result.Total}, New {result.Total - result.Deleted} ```", ParseMode.Markdown,
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -158,14 +142,84 @@ namespace Tolltech.KonturPaymentsLib
             }
         }
 
-        private async Task SendDiffReportAsync(ITelegramBotClient client, long chatId, DateTime fromDate, DateTime toDate)
+        private async Task SendCheckReportAsync(ITelegramBotClient client, long chatId, Guid? alertId, string alertName)
+        {
+            var weekAgoTicks = DateTime.Now.Date.AddDays(-7).Ticks;
+            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
+            var weekAlerts = queryExecutor.Execute(x => x.Select(weekAgoTicks, chatId));
+
+            weekAlerts = alertId.HasValue
+                ? weekAlerts.Where(x => x.AlertId == alertId.Value.ToString()).ToArray()
+                : weekAlerts.Where(x => x.AlertName.Contains(alertName)).ToArray();
+
+
+            await client.SendTextMessageAsync(chatId, "```\r\n" +
+                                                      $"Check for {(alertId.HasValue ? alertId.Value.ToString() : alertName)}\r\n" +
+                                                      $"Total {weekAlerts.Length}\r\n" +
+                                                      string.Join("\r\n",
+                                                          weekAlerts.GroupBy(x => x.MessageDate.Date)
+                                                              .OrderByDescending(x => x.Key).Select(x =>
+                                                                  $"{x.Key:yyyy-MM-dd} {x.Count()}")) +
+                                                      "```", ParseMode.Markdown).ConfigureAwait(false);
+        }
+
+        private async Task SendLastHistoryUploadInfo(ITelegramBotClient client, CancellationToken cancellationToken,
+            Message? message)
+        {
+            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
+            var lastTimestamp = queryExecutor.Execute(x => x.GetLastTimestamp());
+            var lastTimestampDate = new DateTime(lastTimestamp);
+            var diff = DateTime.UtcNow - lastTimestampDate;
+
+            await client.SendTextMessageAsync(message.Chat.Id,
+                    $"``` {(diff.TotalHours >= 4 ? "ATTENTION " : string.Empty)}Last HistoryUpload was {lastTimestampDate} UTC ({diff.TotalHours} hours ago) ```",
+                    ParseMode.Markdown,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task ParseAndSaveHistory(ITelegramBotClient client, CancellationToken cancellationToken,
+            Message? message)
+        {
+            var document = message.Document;
+
+            if (document == null || string.IsNullOrWhiteSpace(document.FileId))
+            {
+                return;
+            }
+
+            var file = telegramClient.GetFile(document.FileId);
+
+            var chatHistory = JsonConvert.DeserializeObject<ChatDto>(Encoding.UTF8.GetString(file));
+
+            chatIds.Add(message.Chat.Id);
+
+            if (timer == null)
+            {
+                timer = new System.Timers.Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+
+                timer.Elapsed += (sender, e) => OnTimedEvent();
+                timer.AutoReset = true;
+                timer.Enabled = true;
+            }
+
+            var result = await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
+            await client.SendTextMessageAsync(message.Chat.Id,
+                    $"``` Total {result.Total}, New {result.Total - result.Deleted} ```", ParseMode.Markdown,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task SendDiffReportAsync(ITelegramBotClient client, long chatId, DateTime fromDate,
+            DateTime toDate)
         {
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
 
             var todayAlerts = queryExecutor.Execute(f => f.Select(toDate.Ticks, chatId));
             var yesterdayAlerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId, toDate.Ticks));
 
-            await client.SendTextMessageAsync(chatId, $"``` Diff from {fromDate:yyyy-MM-dd} to {toDate:yyyy-MM-dd} ```", ParseMode.Markdown).ConfigureAwait(false);
+            await client.SendTextMessageAsync(chatId, $"``` Diff from {fromDate:yyyy-MM-dd} to {toDate:yyyy-MM-dd} ```",
+                ParseMode.Markdown).ConfigureAwait(false);
 
             Console.WriteLine($"diff from {fromDate} to {toDate}. {yesterdayAlerts.Length} {todayAlerts.Length}");
 
@@ -178,20 +232,25 @@ namespace Tolltech.KonturPaymentsLib
             sb.AppendLine("```");
 
             var yesterdayAlertIds = new HashSet<string>(yesterdayAlerts.Select(x => x.AlertId));
-            var newTodayAlerts = todayAlerts.Where(x => !yesterdayAlertIds.Contains(x.AlertId)).GroupBy(x => x.AlertId).ToArray();
+            var newTodayAlerts = todayAlerts.Where(x => !yesterdayAlertIds.Contains(x.AlertId)).GroupBy(x => x.AlertId)
+                .ToArray();
             sb.AppendLine($"New - {newTodayAlerts.Length}");
 
-            foreach (var alert in newTodayAlerts.OrderByDescending(x=>x.Count()))
+            foreach (var alert in newTodayAlerts.OrderByDescending(x => x.Count()))
             {
-                sb.AppendLine($"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
+                sb.AppendLine(
+                    $"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
             }
 
-            var todayNotOkAlertIds = new HashSet<string>(todayAlerts.Where(x => x.AlertStatus.ToLower() != "ok").Select(x => x.AlertId));
-            var repairedAlerts = yesterdayAlerts.Where(x => !todayNotOkAlertIds.Contains(x.AlertId)).GroupBy(x=>x.AlertId).ToArray();
+            var todayNotOkAlertIds =
+                new HashSet<string>(todayAlerts.Where(x => x.AlertStatus.ToLower() != "ok").Select(x => x.AlertId));
+            var repairedAlerts = yesterdayAlerts.Where(x => !todayNotOkAlertIds.Contains(x.AlertId))
+                .GroupBy(x => x.AlertId).ToArray();
             sb.AppendLine($"Repaired - {repairedAlerts.Length}");
-            foreach (var alert in repairedAlerts.OrderByDescending(x=>x.Count()))
+            foreach (var alert in repairedAlerts.OrderByDescending(x => x.Count()))
             {
-                sb.AppendLine($"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
+                sb.AppendLine(
+                    $"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
             }
 
             await client.SendTextMessageAsync(chatId, sb.ToString(), ParseMode.Markdown).ConfigureAwait(false);
@@ -202,7 +261,8 @@ namespace Tolltech.KonturPaymentsLib
             Console.WriteLine($"Send stats for {chatId} days {dayCount}");
 
             var fromDate = DateTime.UtcNow.AddDays(-dayCount);
-            await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:s} ```", ParseMode.Markdown).ConfigureAwait(false);
+            await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:s} ```", ParseMode.Markdown)
+                .ConfigureAwait(false);
 
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId));

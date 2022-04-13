@@ -30,6 +30,11 @@ namespace Tolltech.KonturPaymentsLib
             dataContext.Table.AddRange(alerts);
         }
 
+        public long GetLastTimestamp()
+        {
+            return dataContext.Table.OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp).FirstOrDefault();
+        }
+
         public MoiraAlertDbo[] Select(long exclusiveFromUtcTicks, long chatId, long? exclusiveToTicks = null)
         {
             var from = new DateTime(exclusiveFromUtcTicks);
