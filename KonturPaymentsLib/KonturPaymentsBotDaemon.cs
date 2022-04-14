@@ -268,7 +268,7 @@ namespace Tolltech.KonturPaymentsLib
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId));
 
-            var message = string.Join("\r\n",
+            var lines = 
                 new[] { "Name;Status;Count;LastDate;Url" }
                     .Concat(
                         alerts
@@ -276,9 +276,30 @@ namespace Tolltech.KonturPaymentsLib
                             .GroupBy(x => x.AlertId)
                             .OrderByDescending(x => x.Count())
                             .Select(x =>
-                                $"{x.First().AlertName};{string.Join(",", x.Select(y => y.AlertStatus).Distinct().OrderBy(y => y))};{x.Count()};{x.OrderByDescending(y => y.MessageDate).Select(y => y.MessageDate).First():dd.MM.yyyy};[{x.Key}](https://moira.skbkontur.ru/trigger/{x.AlertId})")));
+                                $"{x.First().AlertName};{string.Join(",", x.Select(y => y.AlertStatus).Distinct().OrderBy(y => y))};{x.Count()};{x.OrderByDescending(y => y.MessageDate).Select(y => y.MessageDate).First():dd.MM.yyyy};[{x.Key}](https://moira.skbkontur.ru/trigger/{x.Key})"));
 
-            await client.SendTextMessageAsync(chatId, message, ParseMode.Markdown).ConfigureAwait(false);
+            foreach (var message in MergeToMessages(lines))
+            {
+                await client.SendTextMessageAsync(chatId, message, ParseMode.Markdown).ConfigureAwait(false);
+            }
+        }
+
+        private static IEnumerable<string> MergeToMessages(IEnumerable<string> lines)
+        {
+            var sb = new StringBuilder();
+            foreach (var line in lines)
+            {
+                if (sb.Length + line.Length > 4000 && sb.Length > 0)
+                {
+                    yield return sb.ToString();
+                    sb.Clear();
+                }
+
+                sb.AppendLine(line);
+            }
+
+            if (sb.Length > 0)
+                yield return sb.ToString();
         }
 
         private Task<(int Deleted, int Total)> SaveMessageIfAlertAsync([NotNull] ChatDto chatHistory, long chatId)
