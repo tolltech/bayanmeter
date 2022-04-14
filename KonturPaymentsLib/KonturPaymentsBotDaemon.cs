@@ -139,6 +139,10 @@ namespace Tolltech.KonturPaymentsLib
             {
                 log.Error("BotDaemonException", e);
                 Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
+                if (update.Message?.Chat.Id != null)
+                    await client
+                        .SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -268,7 +272,7 @@ namespace Tolltech.KonturPaymentsLib
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId));
 
-            var lines = 
+            var lines =
                 new[] { "Name;Status;Count;LastDate;Url" }
                     .Concat(
                         alerts
