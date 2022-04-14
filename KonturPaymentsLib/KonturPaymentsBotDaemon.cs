@@ -280,7 +280,7 @@ namespace Tolltech.KonturPaymentsLib
                             .GroupBy(x => x.AlertId)
                             .OrderByDescending(x => x.Count())
                             .Select(x =>
-                                $"{x.First().AlertName};{string.Join(",", x.Select(y => y.AlertStatus).Distinct().OrderBy(y => y))};{x.Count()};{x.OrderByDescending(y => y.MessageDate).Select(y => y.MessageDate).First():dd.MM.yyyy};[{x.Key}](https://moira.skbkontur.ru/trigger/{x.Key})"));
+                                $"{x.First().AlertName};{string.Join(" ", x.Select(y => y.AlertStatus).Distinct().OrderBy(y => y))};{x.Count()};{x.OrderByDescending(y => y.MessageDate).Select(y => y.MessageDate).First():dd.MM.yyyy};[{x.Key}](https://moira.skbkontur.ru/trigger/{x.Key})"));
 
             foreach (var message in MergeToMessages(lines))
             {
