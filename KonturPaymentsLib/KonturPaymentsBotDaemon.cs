@@ -261,20 +261,22 @@ namespace Tolltech.KonturPaymentsLib
             Console.WriteLine($"Send stats for {chatId} days {dayCount}");
 
             var fromDate = DateTime.UtcNow.AddDays(-dayCount);
-            await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:yyyy-MM-dd hh:mm} ```", ParseMode.Markdown)
+            await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:yyyy-MM-dd hh:mm} ```",
+                    ParseMode.Markdown)
                 .ConfigureAwait(false);
 
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
             var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId));
 
             var message = string.Join("\r\n",
-                new[] { "Name;Status;Count;Url" }
+                new[] { "Name;Status;Count;LastDate;Url" }
                     .Concat(
-                        alerts.GroupBy(x => (x.AlertId, x.AlertStatus))
-                            .Where(x => x.Key.AlertStatus.Trim().ToLower() != "ok")
+                        alerts
+                            .Where(x => x.AlertStatus.Trim().ToLower() != "ok")
+                            .GroupBy(x => x.AlertId)
                             .OrderByDescending(x => x.Count())
                             .Select(x =>
-                                $"{x.First().AlertName};{x.Key.AlertStatus};{x.Count()};[{x.Key.AlertId}](https://moira.skbkontur.ru/trigger/{x.Key.AlertId})")));
+                                $"{x.First().AlertName};{string.Join(",", x.Select(y => y.AlertStatus).Distinct().OrderBy(y => y))};{x.Count()};{x.OrderByDescending(y => y.MessageDate).Select(y => y.MessageDate).First():dd.MM.yyyy};[{x.Key}](https://moira.skbkontur.ru/trigger/{x.AlertId})")));
 
             await client.SendTextMessageAsync(chatId, message, ParseMode.Markdown).ConfigureAwait(false);
         }
