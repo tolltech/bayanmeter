@@ -96,7 +96,10 @@ namespace Tolltech.KonturPaymentsLib
 
                 await ParseAndSaveHistory(client, cancellationToken, message).ConfigureAwait(false);
 
-                await SendLastHistoryUploadInfo(client, cancellationToken, message).ConfigureAwait(false);
+                if (message.Text?.StartsWith(@"/") ?? false)
+                {
+                    await SendLastHistoryUploadInfo(client, cancellationToken, message).ConfigureAwait(false);
+                }
 
                 if (message.Text?.StartsWith(@"/stats") ?? false)
                 {
