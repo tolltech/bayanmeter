@@ -1,4 +1,5 @@
 /.vs/*
+/.idea
 /BayanMeter.sln.DotSettings.user
 /BayanMeter/args.txt
 /*/bin/*

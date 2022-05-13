@@ -57,7 +57,7 @@ namespace Tolltech.KonturPaymentsLib
 
             foreach (var chatId in chatIds.Distinct())
             {
-                SendStatsReportAsync(telegramBotClient, chatId, 1).GetAwaiter().GetResult();
+                SendStatsReportAsync(telegramBotClient, chatId, 1, DateTime.Now).GetAwaiter().GetResult();
             }
 
             timerDates.AddOrUpdate(utcNow.Date, time => 1, (time, i) => i + 1);
@@ -101,25 +101,34 @@ namespace Tolltech.KonturPaymentsLib
                     await SendLastHistoryUploadInfo(client, cancellationToken, message).ConfigureAwait(false);
                 }
 
-                if (message.Text?.StartsWith(@"/stats") ?? false)
+                var args = message.Text?
+                                     .Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                                     .Select(x => x.Trim())
+                                     .ToArray()
+                                 ?? Array.Empty<string>();
+
+                if (args.FirstOrDefault() == @"/stats")
                 {
-                    var dayCount = int.TryParse(message.Text.Replace(@"/stats", string.Empty).Trim(), out var d)
+                    var dayCount = int.TryParse(args.Skip(1).FirstOrDefault(), out var d)
                         ? d
                         : 1;
-                    await SendStatsReportAsync(client, message.Chat.Id, dayCount).ConfigureAwait(false);
+
+                    var periodEnd = DateTime.TryParseExact(args.Skip(2).FirstOrDefault(),
+                        "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d2)
+                        ? d2
+                        : DateTime.Now.Date;
+
+                    await SendStatsReportAsync(client, message.Chat.Id, dayCount, periodEnd).ConfigureAwait(false);
                 }
 
-                if (message.Text?.StartsWith(@"/diff") ?? false)
+                if (args.FirstOrDefault() == @"/diff")
                 {
-                    var parameters = message.Text.Replace(@"/diff", string.Empty)
-                        .Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-
-                    var fromDate = DateTime.TryParseExact(parameters.FirstOrDefault(),
+                    var fromDate = DateTime.TryParseExact(args.Skip(1).FirstOrDefault(),
                         "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d1)
                         ? d1
                         : DateTime.Now.Date.AddDays(-1);
 
-                    var toDate = DateTime.TryParseExact(parameters.Skip(1).FirstOrDefault(),
+                    var toDate = DateTime.TryParseExact(args.Skip(2).FirstOrDefault(),
                         "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d2)
                         ? d2
                         : DateTime.Now.Date;
@@ -127,13 +136,12 @@ namespace Tolltech.KonturPaymentsLib
                     await SendDiffReportAsync(client, message.Chat.Id, fromDate, toDate).ConfigureAwait(false);
                 }
 
-                if (message.Text?.StartsWith(@"/check") ?? false)
+                if (args.FirstOrDefault() == @"/check")
                 {
-                    var alertId = Guid.TryParse(message.Text.Replace(@"/check", string.Empty).Trim(), out var g)
+                    var alertName = args.Skip(1).FirstOrDefault();
+                    var alertId = Guid.TryParse(alertName, out var g)
                         ? g
                         : (Guid?)null;
-
-                    var alertName = message.Text.Replace(@"/check", string.Empty).Trim();
 
                     await SendCheckReportAsync(client, message.Chat.Id, alertId, alertName).ConfigureAwait(false);
                 }
@@ -263,17 +271,17 @@ namespace Tolltech.KonturPaymentsLib
             await client.SendTextMessageAsync(chatId, sb.ToString(), ParseMode.Markdown).ConfigureAwait(false);
         }
 
-        private async Task SendStatsReportAsync(ITelegramBotClient client, long chatId, int dayCount)
+        private async Task SendStatsReportAsync(ITelegramBotClient client, long chatId, int dayCount, DateTime periodEnd)
         {
-            Console.WriteLine($"Send stats for {chatId} days {dayCount}");
+            Console.WriteLine($"Send stats for {chatId} days {dayCount} upto {periodEnd}");
 
-            var fromDate = DateTime.UtcNow.AddDays(-dayCount);
+            var fromDate = periodEnd.AddDays(-dayCount);
             await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:yyyy-MM-dd hh:mm} ```",
                     ParseMode.Markdown)
                 .ConfigureAwait(false);
 
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
-            var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId));
+            var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId, periodEnd.Ticks));
 
             var lines =
                 new[] { "Name;Status;Count;LastDate;Url" }
