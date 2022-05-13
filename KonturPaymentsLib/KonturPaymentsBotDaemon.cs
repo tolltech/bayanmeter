@@ -107,13 +107,16 @@ namespace Tolltech.KonturPaymentsLib
                                      .ToArray()
                                  ?? Array.Empty<string>();
 
-                if (args.FirstOrDefault() == @"/stats")
+                var command = args.FirstOrDefault();
+                var firstArg = args.Skip(1).FirstOrDefault();
+                var secondArg = args.Skip(2).FirstOrDefault();
+                if (command == @"/stats")
                 {
-                    var dayCount = int.TryParse(args.Skip(1).FirstOrDefault(), out var d)
+                    var dayCount = int.TryParse(firstArg, out var d)
                         ? d
                         : 1;
 
-                    var periodEnd = DateTime.TryParseExact(args.Skip(2).FirstOrDefault(),
+                    var periodEnd = DateTime.TryParseExact(secondArg,
                         "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d2)
                         ? d2
                         : DateTime.Now.Date;
@@ -121,14 +124,14 @@ namespace Tolltech.KonturPaymentsLib
                     await SendStatsReportAsync(client, message.Chat.Id, dayCount, periodEnd).ConfigureAwait(false);
                 }
 
-                if (args.FirstOrDefault() == @"/diff")
+                if (command == @"/diff")
                 {
-                    var fromDate = DateTime.TryParseExact(args.Skip(1).FirstOrDefault(),
+                    var fromDate = DateTime.TryParseExact(firstArg,
                         "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d1)
                         ? d1
                         : DateTime.Now.Date.AddDays(-1);
 
-                    var toDate = DateTime.TryParseExact(args.Skip(2).FirstOrDefault(),
+                    var toDate = DateTime.TryParseExact(secondArg,
                         "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d2)
                         ? d2
                         : DateTime.Now.Date;
@@ -136,9 +139,9 @@ namespace Tolltech.KonturPaymentsLib
                     await SendDiffReportAsync(client, message.Chat.Id, fromDate, toDate).ConfigureAwait(false);
                 }
 
-                if (args.FirstOrDefault() == @"/check")
+                if (command == @"/check")
                 {
-                    var alertName = args.Skip(1).FirstOrDefault();
+                    var alertName = firstArg;
                     var alertId = Guid.TryParse(alertName, out var g)
                         ? g
                         : (Guid?)null;
