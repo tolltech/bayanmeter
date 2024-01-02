@@ -1,6 +1,10 @@
-﻿using System.Text.Json.Nodes;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using log4net;
-using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
@@ -17,22 +21,24 @@ namespace Tolltech.Storer
 
         private static readonly ILog log = LogManager.GetLogger(typeof(ServerStorerBotDaemon));
         private readonly StorerCustomSettings storerCustomSettings;
-        private readonly Dictionary<string, string>? storerCustomSettingsRaw;
+        private readonly Dictionary<string, string> storerCustomSettingsRaw;
 
         public ServerStorerBotDaemon(ITelegramClient telegramClient, CustomSettings customSettings)
         {
             this.telegramClient = telegramClient;
-            storerCustomSettingsRaw = customSettings.Raw.Split(",", StringSplitOptions.RemoveEmptyEntries)
-                .ToDictionary(x => x.Split("=", StringSplitOptions.RemoveEmptyEntries)[0],
-                    x => x.Split("=", StringSplitOptions.RemoveEmptyEntries)[1]);
+            storerCustomSettingsRaw = customSettings.Raw.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                .ToDictionary(x => x.Split(new[] { "=" }, StringSplitOptions.RemoveEmptyEntries)[0],
+                    x => x.Split(new[] { "=" }, StringSplitOptions.RemoveEmptyEntries)[1]);
             storerCustomSettings = new StorerCustomSettings
             {
                 RootDir = storerCustomSettingsRaw["RootDir"],
-                AllowedUsers = storerCustomSettingsRaw["AllowedUsers"].Split(" ", StringSplitOptions.RemoveEmptyEntries)
+                AllowedUsers = storerCustomSettingsRaw["AllowedUsers"]
+                    .Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
             };
         }
 
-        public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient client, Update update,
+            CancellationToken cancellationToken)
         {
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (update.Type != UpdateType.Message)
@@ -57,7 +63,8 @@ namespace Tolltech.Storer
             }
         }
 
-        public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception,
+            CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
             {
@@ -109,7 +116,7 @@ namespace Tolltech.Storer
                 log.Info($"Video was not saved. RootDir is null");
                 return;
             }
-            
+
             var folderName = $"{message.Chat.Title}_" +
                              $"{new string(message.Chat.Id.ToString().Where(char.IsLetterOrDigit).ToArray())}";
 
@@ -120,7 +127,8 @@ namespace Tolltech.Storer
                 Directory.CreateDirectory(fullFolderPath);
             }
 
-            var fullFileName = Path.Combine(fullFolderPath, $"{new string(message.MessageId.ToString().Where(char.IsLetterOrDigit).ToArray())}_{video.FileName}");
+            var fullFileName = Path.Combine(fullFolderPath,
+                $"{new string(message.MessageId.ToString().Where(char.IsLetterOrDigit).ToArray())}_{video.FileName}");
             File.WriteAllBytes(fullFileName, bytes);
         }
 
