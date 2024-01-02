@@ -178,7 +178,7 @@ namespace Tolltech.KonturPaymentsLib
                                                           weekAlerts.GroupBy(x => x.MessageDate.Date)
                                                               .OrderByDescending(x => x.Key).Select(x =>
                                                                   $"{x.Key:yyyy-MM-dd} {x.Count()}")) +
-                                                      "```", ParseMode.Markdown).ConfigureAwait(false);
+                                                      "```", null, ParseMode.Markdown).ConfigureAwait(false);
         }
 
         private async Task SendLastHistoryUploadInfo(ITelegramBotClient client, CancellationToken cancellationToken,
@@ -191,7 +191,7 @@ namespace Tolltech.KonturPaymentsLib
 
             await client.SendTextMessageAsync(message.Chat.Id,
                     $"``` {(diff.TotalHours >= 4 ? "ATTENTION " : string.Empty)}Last HistoryUpload was {lastTimestampDate:yyyy-MM-dd hh:mm} UTC ({(int)diff.TotalHours} hours ago) ```",
-                    ParseMode.Markdown,
+                    null, ParseMode.Markdown,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -223,7 +223,7 @@ namespace Tolltech.KonturPaymentsLib
 
             var result = await SaveMessageIfAlertAsync(chatHistory, message.Chat.Id).ConfigureAwait(false);
             await client.SendTextMessageAsync(message.Chat.Id,
-                    $"``` Total {result.Total}, New {result.Total - result.Deleted} ```", ParseMode.Markdown,
+                    $"``` Total {result.Total}, New {result.Total - result.Deleted} ```", null, ParseMode.Markdown,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -237,7 +237,7 @@ namespace Tolltech.KonturPaymentsLib
             var yesterdayAlerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId, toDate.Ticks));
 
             await client.SendTextMessageAsync(chatId, $"``` Diff from {fromDate:yyyy-MM-dd} to {toDate:yyyy-MM-dd} ```",
-                ParseMode.Markdown).ConfigureAwait(false);
+                null, ParseMode.Markdown).ConfigureAwait(false);
 
             Console.WriteLine($"diff from {fromDate} to {toDate}. {yesterdayAlerts.Length} {todayAlerts.Length}");
 
@@ -271,7 +271,7 @@ namespace Tolltech.KonturPaymentsLib
                     $"{alert.Count()};[{alert.First().AlertName}](https://moira.skbkontur.ru/trigger/{alert.Key})");
             }
 
-            await client.SendTextMessageAsync(chatId, sb.ToString(), ParseMode.Markdown).ConfigureAwait(false);
+            await client.SendTextMessageAsync(chatId, sb.ToString(), null, ParseMode.Markdown).ConfigureAwait(false);
         }
 
         private async Task SendStatsReportAsync(ITelegramBotClient client, long chatId, int dayCount, DateTime periodEnd)
@@ -280,7 +280,7 @@ namespace Tolltech.KonturPaymentsLib
 
             var fromDate = periodEnd.AddDays(-dayCount);
             await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:yyyy-MM-dd hh:mm} ```",
-                    ParseMode.Markdown)
+                    null, ParseMode.Markdown)
                 .ConfigureAwait(false);
 
             using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
@@ -298,7 +298,7 @@ namespace Tolltech.KonturPaymentsLib
 
             foreach (var message in MergeToMessages(lines))
             {
-                await client.SendTextMessageAsync(chatId, message, ParseMode.Markdown).ConfigureAwait(false);
+                await client.SendTextMessageAsync(chatId, message, null, ParseMode.Markdown).ConfigureAwait(false);
             }
         }
 

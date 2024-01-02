@@ -10,7 +10,9 @@ using Tolltech.PostgreEF.Integration;
 using Tolltech.TelegramCore;
 using Telegram.Bot.Extensions.Polling;
 using Tolltech.BayanMeterLib.TelegramClient;
+using Tolltech.CoreLib;
 using Tolltech.KonturPaymentsLib;
+using Tolltech.Storer;
 
 namespace Tolltech.BayanMeter
 {
@@ -26,6 +28,7 @@ namespace Tolltech.BayanMeter
         {
             public string Token { get; set; }
             public string BotName { get; set; }
+            public string CustomSettings { get; set; }
         }
 
         private static TelegramBotClient client;
@@ -53,6 +56,7 @@ namespace Tolltech.BayanMeter
             kernel.Unbind<IBotDaemon>();
             kernel.Bind<IBotDaemon>().To<EasyMemeBotDaemon>().Named("EasyMeme");
             kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named("KonturPayments");
+            kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named("ServerStorer");
 
             using var cts = new CancellationTokenSource();
 
@@ -70,6 +74,10 @@ namespace Tolltech.BayanMeter
                 };
 
                 kernel.Bind<TelegramBotClient>().ToConstant(client).WhenAnyAncestorNamed(botSetting.BotName);
+                kernel.Bind<CustomSettings>().ToConstant(new CustomSettings
+                {
+                    Raw = botSetting.CustomSettings ?? string.Empty
+                }).WhenAnyAncestorNamed(botSetting.BotName);
 
                 var botDaemon = kernel.Get<IBotDaemon>(botSetting.BotName);
                 client.StartReceiving(

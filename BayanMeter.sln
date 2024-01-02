@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyProject", "DummyProjec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KonturPaymentsLib", "KonturPaymentsLib\KonturPaymentsLib.csproj", "{06390A75-5814-44D2-A287-CE798C22A4C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorerLib", "StorerLib\StorerLib.csproj", "{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{06390A75-5814-44D2-A287-CE798C22A4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06390A75-5814-44D2-A287-CE798C22A4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06390A75-5814-44D2-A287-CE798C22A4C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
