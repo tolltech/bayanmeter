@@ -78,9 +78,9 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
             var toDate = message.MessageDate;
             var fromDate = toDate.AddMonths(-6);
-            var previousMessages = queryExecutor.Execute(x => x.Select(message.ChatId, fromDate, toDate))
+            var previousMessages = queryExecutor.Execute(x => x.Select(message.ChatId, fromDate.DateTime, toDate.DateTime))
                 .Where(x => x.StrId != messageStrId)
-                .OrderByDescending(x => x.MessageDate)
+                .OrderByDescending(x => x.MessageDate.DateTime)
                 .ToArray();
 
             foreach (var previousMessage in previousMessages)

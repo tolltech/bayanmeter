@@ -54,3 +54,9 @@ alert_id varchar null
 );
 
 CREATE INDEX IF NOT EXISTS moira_alerts_timestamp_chatId on moira_alerts (timestamp, chat_id);
+
+ALTER TABLE messages ALTER message_date TYPE timestamptz USING message_date AT TIME ZONE 'UTC';
+ALTER TABLE messages ALTER edit_date TYPE timestamptz USING edit_date AT TIME ZONE 'UTC';
+ALTER TABLE messages ALTER create_date TYPE timestamptz USING create_date AT TIME ZONE 'UTC';
+
+ALTER TABLE moira_alerts ALTER message_date TYPE timestamptz USING message_date AT TIME ZONE 'UTC';

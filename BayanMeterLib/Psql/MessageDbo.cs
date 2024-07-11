@@ -19,8 +19,8 @@ namespace Tolltech.BayanMeterLib.Psql
         [Column("forward_from_chat_name", TypeName = "varchar")]
         public string ForwardFromChatName { get; set; }
 
-        [Column("edit_date", TypeName = "timestamp")]
-        public DateTime? EditDate { get; set; }
+        [Column("edit_date")]
+        public DateTimeOffset? EditDate { get; set; }
 
         [Column("forward_from_message_id", TypeName = "bigint"), Required]
         public long ForwardFromMessageId { get; set; }
@@ -31,8 +31,8 @@ namespace Tolltech.BayanMeterLib.Psql
         [Column("forward_from_user_id", TypeName = "bigint")]
         public long? ForwardFromUserId { get; set; }
 
-        [Column("create_date", TypeName = "timestamp"), Required]
-        public DateTime CreateDate { get; set; }
+        [Column("create_date"), Required]
+        public DateTimeOffset CreateDate { get; set; }
 
         [Column("forward_from_user_name", TypeName = "varchar")]
         public string ForwardFromUserName { get; set; }
@@ -46,8 +46,8 @@ namespace Tolltech.BayanMeterLib.Psql
         [Column("int_id", TypeName = "int"), Required]
         public int IntId { get; set; }
 
-        [Column("message_date", TypeName = "timestamp"), Required]
-        public DateTime MessageDate { get; set; }
+        [Column("message_date"), Required]
+        public DateTimeOffset MessageDate { get; set; }
 
         [Column("timestamp", TypeName = "bigint")]
         public long Timestamp { get; set; }

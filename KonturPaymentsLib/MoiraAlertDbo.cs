@@ -19,8 +19,8 @@ namespace Tolltech.KonturPaymentsLib
         [Column("int_id", TypeName = "int"), Required]
         public int IntId { get; set; }
 
-        [Column("message_date", TypeName = "timestamp"), Required]
-        public DateTime MessageDate { get; set; }
+        [Column("message_date"), Required]
+        public DateTimeOffset MessageDate { get; set; }
 
         [Column("timestamp", TypeName = "bigint"), Required]
         public long Timestamp { get; set; }
