@@ -60,3 +60,28 @@ ALTER TABLE messages ALTER edit_date TYPE timestamptz USING edit_date AT TIME ZO
 ALTER TABLE messages ALTER create_date TYPE timestamptz USING create_date AT TIME ZONE 'UTC';
 
 ALTER TABLE moira_alerts ALTER message_date TYPE timestamptz USING message_date AT TIME ZONE 'UTC';
+
+CREATE TABLE IF NOT EXISTS foods(
+    id varchar PRIMARY KEY NOT NULL,
+    name varchar NOT NULL,
+    chat_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    kcal int NOT NULL,
+    protein int NOT NULL,
+    fat int NOT NULL,
+    carbohydrate int NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS food_messages(
+                                            id uuid PRIMARY KEY NOT NULL,
+                                            food_id varchar NOT NULL,
+                                            name varchar NOT NULL,
+                                            chat_id bigint NOT NULL,
+                                            user_id bigint NOT NULL,
+                                            message_date timestamptz NOT NULL,
+                                            kcal int NOT NULL,
+                                            protein int NOT NULL,
+                                            fat int NOT NULL,
+                                            carbohydrate int NOT NULL
+);
+--index
