@@ -78,4 +78,12 @@ public class FoodMessageHandler : SqlHandlerBase<FoodMessageDbo>
             .Take(count)
             .ToArray();
     }
+
+    public FoodMessageDbo[] SelectFromDate(DateTime fromDate, long chatId, long userId)
+    {
+        return dataContext.Table
+            .Where(x => x.MessageDate >= fromDate)
+            .Where(x => x.ChatId == chatId && x.UserId == userId)
+            .ToArray();
+    }
 }

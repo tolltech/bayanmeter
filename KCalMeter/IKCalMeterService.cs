@@ -6,5 +6,5 @@ public interface IKCalMeterService
     Task DeleteFood(string name, long chatId, long userId);
     Task WriteFood(string name, int basePortion, FoodInfo foodInfo, long chatId, long userId);
     Task<FoodMessageDbo[]> SelectPortions(int count, long chatId, long userId);
-    
+    Task<FoodMessageDbo[]> SelectPortions(DateTime fromDate, long chatId, long userId);
 }

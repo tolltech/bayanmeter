@@ -41,81 +41,88 @@ public class KCalMeterBotDaemon : IBotDaemon
 
             log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
-           // await ParseAndSaveHistory(client, cancellationToken, message).ConfigureAwait(false);
+            // await ParseAndSaveHistory(client, cancellationToken, message).ConfigureAwait(false);
 
-           var messageText = message.Text ?? string.Empty;
+            var messageText = message.Text ?? string.Empty;
 
-           if (messageText.StartsWith("/"))
-           {
-               await ProcessCommand(message, client, cancellationToken);
-               return;
-           }
-           
-           var args = message.Text?
-                          .ToLower()
-                          .Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
-                          .Select(x => x.Trim())
-                          .ToArray()
-                      ?? Array.Empty<string>();
+            if (messageText.StartsWith("/"))
+            {
+                await ProcessCommand(message, client, cancellationToken);
+                return;
+            }
 
-           if (args.Length <= 2 && args.Length >= 1)
-           {
-               var name = args[0];
-               var portion = 1;
-               if (args.Length > 1 && !int.TryParse(args[1], out portion))
-               {
-                   await SendError("Wrong format", client, message, cancellationToken);
-                   return;
-               }
+            var args = message.Text?
+                           .ToLower()
+                           .Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                           .Select(x => x.Trim())
+                           .ToArray()
+                       ?? Array.Empty<string>();
 
-               await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
-           }
-           else if (args.Length >= 5)
-           {
-               var name = args[0];
-               
-               if (!int.TryParse(args[1], out var kcal))
-               {
-                   await SendError("Wrong format", client, message, cancellationToken);
-                   return;
-               }
-               
-               if (!int.TryParse(args[2], out var protein))
-               {
-                   await SendError("Wrong format", client, message, cancellationToken);
-                   return;
-               }
-               
-               if (!int.TryParse(args[3], out var fat))
-               {
-                   await SendError("Wrong format", client, message, cancellationToken);
-                   return;
-               }
-               
-               if (!int.TryParse(args[4], out var carbohydrates))
-               {
-                   await SendError("Wrong format", client, message, cancellationToken);
-                   return;
-               }
+            if (args.Length <= 2 && args.Length >= 1)
+            {
+                var name = args[0];
+                var portion = 1;
+                if (args.Length > 1 && !int.TryParse(args[1], out portion))
+                {
+                    await SendError("Wrong format", client, message, cancellationToken);
+                    return;
+                }
 
-               var portion = int.TryParse(args.Skip(5).FirstOrDefault(), out var p) ? p : 1;
+                await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
+                
+                await client.SendTextMessageAsync(message.Chat.Id, "Portion done!", cancellationToken: cancellationToken,
+                    replyToMessageId: message.MessageId);
+            }
+            else if (args.Length >= 5)
+            {
+                var name = args[0];
 
-               var foodInfo = new FoodInfo(kcal, protein, fat, carbohydrates);
-               
-               await kCalMeterService.WriteFood(name, portion, foodInfo, message.Chat.Id, message.From!.Id);
-               await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
-           }
-           else
-           {
-               await client.SendTextMessageAsync(message.Chat.Id, "No command!", cancellationToken: cancellationToken);   
-           }
+                if (!int.TryParse(args[1], out var kcal))
+                {
+                    await SendError("Wrong format", client, message, cancellationToken);
+                    return;
+                }
+
+                if (!int.TryParse(args[2], out var protein))
+                {
+                    await SendError("Wrong format", client, message, cancellationToken);
+                    return;
+                }
+
+                if (!int.TryParse(args[3], out var fat))
+                {
+                    await SendError("Wrong format", client, message, cancellationToken);
+                    return;
+                }
+
+                if (!int.TryParse(args[4], out var carbohydrates))
+                {
+                    await SendError("Wrong format", client, message, cancellationToken);
+                    return;
+                }
+
+                var portion = int.TryParse(args.Skip(5).FirstOrDefault(), out var p) ? p : 1;
+
+                var foodInfo = new FoodInfo(kcal, protein, fat, carbohydrates);
+
+                await kCalMeterService.WriteFood(name, portion, foodInfo, message.Chat.Id, message.From!.Id);
+                await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
+
+                await client.SendTextMessageAsync(message.Chat.Id, "New food done!", cancellationToken: cancellationToken,
+                    replyToMessageId: message.MessageId);
+            }
+            else
+            {
+                await client.SendTextMessageAsync(message.Chat.Id, "No command!", cancellationToken: cancellationToken);
+            }
         }
         catch (Exception e)
         {
             log.Error("BotDaemonException", e);
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!", cancellationToken: cancellationToken);
+                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                    cancellationToken: cancellationToken);
         }
     }
 
@@ -144,17 +151,43 @@ public class KCalMeterBotDaemon : IBotDaemon
 
             var portions = await kCalMeterService.SelectPortions(count, chatId, userId);
 
-            var text = new StringBuilder();
-            text.AppendLine(string.Join("\r\n",
-                portions.Reverse().Select(x => $"{x.Name} {x.Kcal} {x.Protein} {x.Fat} {x.Carbohydrate}")));
+            var text = BuildReport(portions);
 
-            text.AppendLine();
-            text.AppendLine(
-                $"Total {portions.Sum(x => x.Kcal)} {portions.Sum(x => x.Protein)} {portions.Sum(x => x.Fat)} {portions.Sum(x => x.Carbohydrate)}");
-
-            await client.SendTextMessageAsync(message.Chat.Id, text.ToString(), cancellationToken: cancellationToken,
+            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
                 replyToMessageId: message.MessageId);
         }
+        else if (messageText.StartsWith("/today"))
+        {
+            var portions = await kCalMeterService.SelectPortions(DateTime.Now, chatId, userId);
+
+            var text = BuildReport(portions);
+
+            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyToMessageId: message.MessageId);
+        }
+
+        else if (messageText.StartsWith("/week"))
+        {
+            var portions = await kCalMeterService.SelectPortions(DateTime.Now.AddDays(-7), chatId, userId);
+
+            var text = BuildReport(portions);
+
+            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyToMessageId: message.MessageId);
+        }
+    }
+
+    private static string BuildReport(FoodMessageDbo[] portions)
+    {
+        var text = new StringBuilder();
+        text.AppendLine(string.Join("\r\n",
+            portions.OrderBy(x => x.MessageDate)
+                .Select(x => $"{x.Name} {x.Kcal} {x.Protein} {x.Fat} {x.Carbohydrate}")));
+
+        text.AppendLine();
+        text.AppendLine(
+            $"Total {portions.Sum(x => x.Kcal)} {portions.Sum(x => x.Protein)} {portions.Sum(x => x.Fat)} {portions.Sum(x => x.Carbohydrate)}");
+        return text.ToString();
     }
 
     public Task HandleErrorAsync(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken)

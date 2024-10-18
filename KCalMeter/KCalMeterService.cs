@@ -88,4 +88,10 @@ public class KCalMeterService : IKCalMeterService
         using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
         return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectLast(count, chatId, userId)));
     }
+
+    public Task<FoodMessageDbo[]> SelectPortions(DateTime fromDate, long chatId, long userId)
+    {
+        using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
+        return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectFromDate(fromDate.Date, chatId, userId)));
+    }
 }
