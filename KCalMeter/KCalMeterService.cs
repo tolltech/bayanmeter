@@ -58,6 +58,7 @@ public class KCalMeterService : IKCalMeterService
     public Task WriteFood(string name, int basePortion, FoodInfo foodInfo, long chatId, long userId)
     {
         using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
+
         var newFood = new FoodDbo
         {
             Id = FoodDbo.GetId(name, chatId, userId),
@@ -70,6 +71,14 @@ public class KCalMeterService : IKCalMeterService
             Carbohydrate = foodInfo.Carbohydrates,
             BasePortion = basePortion
         };
+        
+        var toDelete = queryExecutorFood.Execute(f => f.Find(name, chatId, userId));
+        if (toDelete != null)
+        {
+            queryExecutorFood.Execute(f => f.Delete(toDelete));
+        }
+
+        queryExecutorFood.Execute(f => f.Create(newFood));
         
         return Task.CompletedTask;
     }
