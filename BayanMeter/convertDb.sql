@@ -94,4 +94,4 @@ CREATE INDEX IF NOT EXISTS food_messages_message_date on food_messages (message_
 CREATE INDEX IF NOT EXISTS food_messages_user_id_message_date on food_messages (user_id, message_date);
 CREATE INDEX IF NOT EXISTS food_messages_chat_id_message_date on food_messages (chat_id, message_date);
 
-ALTER TABLE foods ADD COLUMN IF NOT EXISTS [timestamp] bigint default 0;
+ALTER TABLE foods ADD COLUMN IF NOT EXISTS timestamp bigint default 0;

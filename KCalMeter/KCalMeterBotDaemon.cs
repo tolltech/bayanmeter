@@ -158,7 +158,7 @@ public class KCalMeterBotDaemon : IBotDaemon
         }
         else if (messageText.StartsWith("/list"))
         {
-            if (!int.TryParse(messageText.Replace("/last", string.Empty).ToLower().Trim(), out var count))
+            if (!int.TryParse(messageText.Replace("/list", string.Empty).ToLower().Trim(), out var count))
             {
                 count = 100;
             }
