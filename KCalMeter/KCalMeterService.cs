@@ -82,4 +82,10 @@ public class KCalMeterService : IKCalMeterService
         
         return Task.CompletedTask;
     }
+
+    public Task<FoodMessageDbo[]> SelectPortions(int count, long chatId, long userId)
+    {
+        using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
+        return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectLast(count, chatId, userId)));
+    }
 }

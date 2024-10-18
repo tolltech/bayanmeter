@@ -69,4 +69,13 @@ public class FoodMessageHandler : SqlHandlerBase<FoodMessageDbo>
     {
         dataContext.Table.AddRange(items);
     }
+
+    public FoodMessageDbo[] SelectLast(int count, long chatId, long userId)
+    {
+        return dataContext.Table
+            .Where(x => x.ChatId == chatId && x.UserId == userId)
+            .OrderByDescending(x => x.MessageDate)
+            .Take(count)
+            .ToArray();
+    }
 }

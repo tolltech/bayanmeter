@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using System.Text;
+using log4net;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
@@ -46,7 +47,7 @@ public class KCalMeterBotDaemon : IBotDaemon
 
            if (messageText.StartsWith("/"))
            {
-               await ProcessCommand(message);
+               await ProcessCommand(message, client, cancellationToken);
                return;
            }
            
@@ -123,14 +124,36 @@ public class KCalMeterBotDaemon : IBotDaemon
         return client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken);
     }
 
-    private async Task ProcessCommand(Message message)
+    private async Task ProcessCommand(Message message, ITelegramBotClient client, CancellationToken cancellationToken)
     {
         var messageText = message.Text!;
 
+        var userId = message.From!.Id;
+        var chatId = message.Chat.Id;
         if (messageText.StartsWith("/delete"))
         {
             var name = messageText.Replace("/delete", string.Empty).ToLower().Trim();
-            await kCalMeterService.DeleteFood(name, message.Chat.Id, message.From!.Id);
+            await kCalMeterService.DeleteFood(name, chatId, userId);
+        }
+        else if (messageText.StartsWith("/last"))
+        {
+            if (!int.TryParse(messageText.Replace("/last", string.Empty).ToLower().Trim(), out var count))
+            {
+                count = 10;
+            }
+
+            var portions = await kCalMeterService.SelectPortions(count, chatId, userId);
+
+            var text = new StringBuilder();
+            text.AppendLine(string.Join("\r\n",
+                portions.Reverse().Select(x => $"{x.Name} {x.Kcal} {x.Protein} {x.Fat} {x.Carbohydrate}")));
+
+            text.AppendLine();
+            text.AppendLine(
+                $"Total {portions.Sum(x => x.Kcal)} {portions.Sum(x => x.Protein)} {portions.Sum(x => x.Fat)} {portions.Sum(x => x.Carbohydrate)}");
+
+            await client.SendTextMessageAsync(message.Chat.Id, text.ToString(), cancellationToken: cancellationToken,
+                replyToMessageId: message.MessageId);
         }
     }
 
