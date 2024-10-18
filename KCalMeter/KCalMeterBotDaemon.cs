@@ -51,6 +51,7 @@ public class KCalMeterBotDaemon : IBotDaemon
            }
            
            var args = message.Text?
+                          .ToLower()
                           .Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
                           .Select(x => x.Trim())
                           .ToArray()
@@ -129,7 +130,7 @@ public class KCalMeterBotDaemon : IBotDaemon
 
         if (messageText.StartsWith("/delete"))
         {
-            var name = messageText.Replace("/delete", string.Empty).Trim();
+            var name = messageText.Replace("/delete", string.Empty).ToLower().Trim();
             await kCalMeterService.DeleteFood(name, message.Chat.Id, message.From!.Id);
         }
     }
