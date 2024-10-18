@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS foods(
     protein int NOT NULL,
     fat int NOT NULL,
     carbohydrate int NOT NULL,
-    base_portion int NOT NULL    
+    base_portion int NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS foods_name on foods (name);
@@ -93,3 +93,5 @@ CREATE TABLE IF NOT EXISTS food_messages(
 CREATE INDEX IF NOT EXISTS food_messages_message_date on food_messages (message_date);
 CREATE INDEX IF NOT EXISTS food_messages_user_id_message_date on food_messages (user_id, message_date);
 CREATE INDEX IF NOT EXISTS food_messages_chat_id_message_date on food_messages (chat_id, message_date);
+
+ALTER TABLE foods ADD COLUMN IF NOT EXISTS [timestamp] bigint default 0;

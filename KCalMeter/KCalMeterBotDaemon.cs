@@ -156,6 +156,20 @@ public class KCalMeterBotDaemon : IBotDaemon
             await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
                 replyToMessageId: message.MessageId);
         }
+        else if (messageText.StartsWith("/list"))
+        {
+            if (!int.TryParse(messageText.Replace("/last", string.Empty).ToLower().Trim(), out var count))
+            {
+                count = 100;
+            }
+
+            var foods = await kCalMeterService.SelectFood(count, chatId, userId);
+
+            var text = BuildReport(foods);
+
+            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyToMessageId: message.MessageId);
+        }
         else if (messageText.StartsWith("/today"))
         {
             var portions = await kCalMeterService.SelectPortions(DateTime.Now, chatId, userId);
@@ -175,6 +189,16 @@ public class KCalMeterBotDaemon : IBotDaemon
             await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
                 replyToMessageId: message.MessageId);
         }
+    }
+
+    private string BuildReport(FoodDbo[] foods)
+    {
+        var text = new StringBuilder();
+        text.AppendLine(string.Join("\r\n",
+            foods.OrderBy(x => x.Name)
+                .Select(x => $"{x.Name} {x.Kcal} {x.Protein} {x.Fat} {x.Carbohydrate}")));
+        
+        return text.ToString();
     }
 
     private static string BuildReport(FoodMessageDbo[] portions)

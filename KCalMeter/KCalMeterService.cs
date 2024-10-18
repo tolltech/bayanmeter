@@ -71,7 +71,7 @@ public class KCalMeterService : IKCalMeterService
             Carbohydrate = foodInfo.Carbohydrates,
             BasePortion = basePortion
         };
-        
+
         var toDelete = queryExecutorFood.Execute(f => f.Find(name, chatId, userId));
         if (toDelete != null)
         {
@@ -79,7 +79,7 @@ public class KCalMeterService : IKCalMeterService
         }
 
         queryExecutorFood.Execute(f => f.Create(newFood));
-        
+
         return Task.CompletedTask;
     }
 
@@ -93,5 +93,11 @@ public class KCalMeterService : IKCalMeterService
     {
         using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
         return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectFromDate(fromDate.Date, chatId, userId)));
+    }
+
+    public Task<FoodDbo[]> SelectFood(int count, long chatId, long userId)
+    {
+        using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
+        return Task.FromResult(queryExecutorFood.Execute(f => f.SelectLast(count, chatId, userId)));
     }
 }

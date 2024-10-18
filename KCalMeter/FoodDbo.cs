@@ -33,6 +33,9 @@ public class FoodDbo
     [Column("base_portion", TypeName = "int"), Required]
     public int BasePortion { get; set; }
 
+    [Column("timestamp", TypeName = "bigint"), Required]
+    public long Timestamp { get; set; }
+
     public static string GetId(string name, long chatId, long userId)
     {
         return $"{userId}_{chatId}_{name}";

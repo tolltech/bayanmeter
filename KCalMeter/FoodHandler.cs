@@ -48,6 +48,14 @@ public class FoodHandler : SqlHandlerBase<FoodDbo>
         var result = dataContext.Table.FirstOrDefault(x => x.Id == key);
         return result;
     }
+
+    public FoodDbo[] SelectLast(int count, long chatId, long userId)
+    {
+        return dataContext.Table.Where(x => x.ChatId == chatId && x.UserId == userId)
+            .OrderByDescending(x => x.Timestamp)
+            .Take(count)
+            .ToArray();
+    }
 }
 
 // ReSharper disable once ClassNeverInstantiated.Global
