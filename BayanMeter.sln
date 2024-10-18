@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KonturPaymentsLib", "Kontur
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorerLib", "StorerLib\StorerLib.csproj", "{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KCalMeter", "KCalMeter\KCalMeter.csproj", "{D78713CB-809B-45FC-A786-C447116008C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0CF2607-0BB5-4493-B8F4-BBE0D9C6904E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D78713CB-809B-45FC-A786-C447116008C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D78713CB-809B-45FC-A786-C447116008C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D78713CB-809B-45FC-A786-C447116008C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D78713CB-809B-45FC-A786-C447116008C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

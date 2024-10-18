@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using KCalMeter;
 using Newtonsoft.Json;
 using Ninject;
 using Telegram.Bot;
@@ -57,6 +58,7 @@ namespace Tolltech.BayanMeter
             kernel.Bind<IBotDaemon>().To<EasyMemeBotDaemon>().Named("EasyMeme");
             kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named("KonturPayments");
             kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named("ServerStorer");
+            kernel.Bind<IBotDaemon>().To<KCalMeterBotDaemon>().Named("KCalMeter");
 
             using var cts = new CancellationTokenSource();
 
