@@ -60,13 +60,12 @@ public class KCalMeterBotDaemon : IBotDaemon
            if (args.Length <= 2 && args.Length >= 1)
            {
                var name = args[0];
-               if (!int.TryParse(args.Skip(1).FirstOrDefault(), out var portion))
+               var portion = 1;
+               if (args.Length > 1 && !int.TryParse(args[1], out portion))
                {
                    await SendError("Wrong format", client, message, cancellationToken);
                    return;
                }
-
-               if (portion == 0) portion = 1;
 
                await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
            }
