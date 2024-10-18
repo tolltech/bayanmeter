@@ -1,6 +1,6 @@
 using Tolltech.SqlEF;
 
-namespace KCalMeter;
+namespace Tolltech.KCalMeter;
 
 public class KCalMeterService : IKCalMeterService
 {

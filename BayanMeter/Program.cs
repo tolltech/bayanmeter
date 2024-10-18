@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using KCalMeter;
 using Newtonsoft.Json;
 using Ninject;
 using Telegram.Bot;
@@ -12,6 +11,7 @@ using Tolltech.TelegramCore;
 using Telegram.Bot.Extensions.Polling;
 using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.CoreLib;
+using Tolltech.KCalMeter;
 using Tolltech.KonturPaymentsLib;
 using Tolltech.Storer;
 

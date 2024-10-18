@@ -1,4 +1,4 @@
-﻿namespace KCalMeter;
+﻿namespace Tolltech.KCalMeter;
 
 public struct FoodInfo
 {

@@ -4,9 +4,12 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>Tolltech.KCalMeter</AssemblyName>
+        <RootNamespace>Tolltech.KCalMeter</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\PostgreEF\PostgreEF.csproj" />
       <ProjectReference Include="..\SqlEF\SqlEF.csproj" />
       <ProjectReference Include="..\TelegramCore\TelegramCore.csproj" />
     </ItemGroup>

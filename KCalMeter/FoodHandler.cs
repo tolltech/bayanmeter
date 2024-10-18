@@ -1,7 +1,7 @@
 ﻿using Tolltech.SqlEF;
 using Tolltech.SqlEF.Integration;
 
-namespace KCalMeter;
+namespace Tolltech.KCalMeter;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class FoodHandler : SqlHandlerBase<FoodDbo>

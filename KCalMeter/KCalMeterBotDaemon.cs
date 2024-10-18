@@ -6,7 +6,7 @@ using Telegram.Bot.Types.Enums;
 using Tolltech.SqlEF;
 using Tolltech.TelegramCore;
 
-namespace KCalMeter;
+namespace Tolltech.KCalMeter;
 
 public class KCalMeterBotDaemon : IBotDaemon
 {

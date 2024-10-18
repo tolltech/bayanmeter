@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace KCalMeter;
+namespace Tolltech.KCalMeter;
 
 [Table("foods")]
 public class FoodDbo
