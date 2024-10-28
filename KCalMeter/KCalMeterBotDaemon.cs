@@ -4,6 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Tolltech.CoreLib.Helpers;
 using Tolltech.SqlEF;
 using Tolltech.TelegramCore;
 
@@ -61,8 +62,8 @@ public class KCalMeterBotDaemon : IBotDaemon
             if (args.Length <= 2 && args.Length >= 1)
             {
                 var name = args[0];
-                var portion = 1;
-                if (args.Length > 1 && !int.TryParse(args[1], out portion))
+                var portion = 1m;
+                if (args.Length > 1 && !decimal.TryParse(args[1], out portion))
                 {
                     await SendError("Wrong format", client, message, cancellationToken);
                     return;
@@ -139,12 +140,12 @@ public class KCalMeterBotDaemon : IBotDaemon
         var chatId = message.Chat.Id;
         if (messageText.StartsWith("/delete"))
         {
-            var name = messageText.Replace("/delete", string.Empty).ToLower().Trim();
+            var name = messageText.GetArguments().First();
             await kCalMeterService.DeleteFood(name, chatId, userId);
         }
         else if (messageText.StartsWith("/last"))
         {
-            if (!int.TryParse(messageText.Replace("/last", string.Empty).ToLower().Trim(), out var count))
+            if (!int.TryParse(messageText.GetArguments().FirstOrDefault(), out var count))
             {
                 count = 10;
             }
@@ -158,7 +159,7 @@ public class KCalMeterBotDaemon : IBotDaemon
         }
         else if (messageText.StartsWith("/list"))
         {
-            if (!int.TryParse(messageText.Replace("/list", string.Empty).ToLower().Trim(), out var count))
+            if (!int.TryParse(messageText.GetArguments().FirstOrDefault(), out var count))
             {
                 count = 100;
             }

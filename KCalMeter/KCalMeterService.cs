@@ -11,7 +11,7 @@ public class KCalMeterService : IKCalMeterService
         this.queryExecutorFactory = queryExecutorFactory;
     }
 
-    public Task WritePortion(string name, int portion, long chatId, long userId, DateTime messageDate)
+    public Task WritePortion(string name, decimal portion, long chatId, long userId, DateTime messageDate)
     {
         using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
         using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
@@ -32,10 +32,10 @@ public class KCalMeterService : IKCalMeterService
             UserId = userId,
             MessageDate = messageDate,
             CreateDate = DateTime.UtcNow,
-            Kcal = kcal,
-            Protein = protein,
-            Fat = fat,
-            Carbohydrate = carbohydrate
+            Kcal = (int)kcal,
+            Protein = (int)protein,
+            Fat = (int)fat,
+            Carbohydrate = (int)carbohydrate
         };
 
         queryExecutorFoodMessage.Execute(f => f.Create(newPortion));
