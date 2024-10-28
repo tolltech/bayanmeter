@@ -49,9 +49,16 @@ public class FoodHandler : SqlHandlerBase<FoodDbo>
         return result;
     }
 
-    public FoodDbo[] SelectLast(int count, long chatId, long userId)
+    public FoodDbo[] SelectLast(int count, long chatId, long userId, string? sub)
     {
-        return dataContext.Table.Where(x => x.ChatId == chatId && x.UserId == userId)
+        var query = dataContext.Table.Where(x => x.ChatId == chatId && x.UserId == userId);
+
+        if (!string.IsNullOrWhiteSpace(sub))
+        {
+            query = query.Where(x => x.Name.Contains(sub));
+        }
+            
+        return query
             .OrderByDescending(x => x.Timestamp)
             .Take(count)
             .ToArray();

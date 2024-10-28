@@ -95,9 +95,9 @@ public class KCalMeterService : IKCalMeterService
         return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectFromDate(fromDate.Date, chatId, userId)));
     }
 
-    public Task<FoodDbo[]> SelectFood(int count, long chatId, long userId)
+    public Task<FoodDbo[]> SelectFood(int count, long chatId, long userId, string? sub)
     {
         using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
-        return Task.FromResult(queryExecutorFood.Execute(f => f.SelectLast(count, chatId, userId)));
+        return Task.FromResult(queryExecutorFood.Execute(f => f.SelectLast(count, chatId, userId, sub)));
     }
 }

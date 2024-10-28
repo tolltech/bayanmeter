@@ -159,12 +159,17 @@ public class KCalMeterBotDaemon : IBotDaemon
         }
         else if (messageText.StartsWith("/list"))
         {
+            var sub = (string?)null;
             if (!int.TryParse(messageText.GetArguments().FirstOrDefault(), out var count))
             {
                 count = 100;
             }
+            else
+            {
+                sub = messageText.GetArguments().FirstOrDefault()?.ToLower();
+            }
 
-            var foods = await kCalMeterService.SelectFood(count, chatId, userId);
+            var foods = await kCalMeterService.SelectFood(count, chatId, userId, sub);
 
             var text = BuildReport(foods);
 
