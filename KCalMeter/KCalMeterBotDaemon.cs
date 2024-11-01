@@ -202,7 +202,7 @@ public class KCalMeterBotDaemon : IBotDaemon
         var text = new StringBuilder();
         text.AppendLine(string.Join("\r\n",
             foods.OrderBy(x => x.Name)
-                .Select(x => $"{x.Name} {x.Kcal} {x.Protein} {x.Fat} {x.Carbohydrate}")));
+                .Select(x => $"{x.Name} {x.Kcal} kcal / {x.BasePortion} base portion")));
         
         return text.ToString();
     }
