@@ -44,7 +44,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 await SaveMessageIfPhotoAsync(message).ConfigureAwait(false);
 
-                if (message.Text == @"/easymeme")
+                if (message.Text?.StartsWith(@"/easymeme") ?? false)
                 {
                     await SendEasyMemeAsync(client, message.Chat.Id).ConfigureAwait(false);
                 }
