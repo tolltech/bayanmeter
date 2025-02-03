@@ -23,7 +23,12 @@ public static class LevDimovService
             }
             else
             {
-                yield return $"{word} {word.Replace("лев", "димов")}";   
+                var leftSymbols = new string(word.TakeWhile(c => !char.IsLetterOrDigit(c)).ToArray());
+                var realWord = new string(word.SkipWhile(c => !char.IsLetterOrDigit(c)).TakeWhile(char.IsLetterOrDigit)
+                    .ToArray());
+                var rightSymbols = word.Replace($"{leftSymbols}{realWord}", string.Empty);
+
+                yield return $"{leftSymbols}{realWord} {realWord.Replace("лев", "димов")}{rightSymbols}";
             }
         }
     }
