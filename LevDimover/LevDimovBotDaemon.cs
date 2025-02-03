@@ -35,10 +35,16 @@ public class LevDimovBotDaemon : IBotDaemon
             log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
             var messageText = message.Text ?? string.Empty;
-
-            await client.SendTextMessageAsync(message.Chat.Id, "New food done!",
-                cancellationToken: cancellationToken,
-                replyToMessageId: message.MessageId);
+            var replyMessageText = LevDimovService.Convert(messageText);
+            
+            log.Info($"GetNewMessage {replyMessageText} from {messageText}");
+            
+            if (messageText != replyMessageText)
+            {
+                await client.SendTextMessageAsync(message.Chat.Id, replyMessageText,
+                    cancellationToken: cancellationToken,
+                    replyToMessageId: message.MessageId);   
+            }
         }
         catch (Exception e)
         {
