@@ -59,6 +59,7 @@ namespace Tolltech.BayanMeter
             kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named("KonturPayments");
             kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named("ServerStorer");
             kernel.Bind<IBotDaemon>().To<KCalMeterBotDaemon>().Named("KCalMeter");
+            kernel.Bind<IBotDaemon>().To<KCalMeterBotDaemon>().Named("LevDimover");
 
             using var cts = new CancellationTokenSource();
 

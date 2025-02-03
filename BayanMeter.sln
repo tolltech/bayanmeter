@@ -35,6 +35,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorerLib", "StorerLib\Stor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KCalMeter", "KCalMeter\KCalMeter.csproj", "{D78713CB-809B-45FC-A786-C447116008C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LevDimover", "LevDimover\LevDimover.csproj", "{31139D66-D121-46BC-8367-CCCA1C8FD0EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LevDimoverTest", "LevDimoverTest\LevDimoverTest.csproj", "{B85F6D10-C8B8-49F2-AC9F-70F41714503E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +109,14 @@ Global
 		{D78713CB-809B-45FC-A786-C447116008C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D78713CB-809B-45FC-A786-C447116008C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D78713CB-809B-45FC-A786-C447116008C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31139D66-D121-46BC-8367-CCCA1C8FD0EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31139D66-D121-46BC-8367-CCCA1C8FD0EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31139D66-D121-46BC-8367-CCCA1C8FD0EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31139D66-D121-46BC-8367-CCCA1C8FD0EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B85F6D10-C8B8-49F2-AC9F-70F41714503E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B85F6D10-C8B8-49F2-AC9F-70F41714503E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B85F6D10-C8B8-49F2-AC9F-70F41714503E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B85F6D10-C8B8-49F2-AC9F-70F41714503E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
