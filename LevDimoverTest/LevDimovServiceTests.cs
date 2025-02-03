@@ -12,6 +12,7 @@ public class LevDimovServiceTests
     [Test]
     [TestCase("Хлев", ExpectedResult = "Хлев Хдимов")]
     [TestCase("первое слово Хлев второе", ExpectedResult = "первое слово Хлев Хдимов второе")]
+    [TestCase("первое слово левe второе корове", ExpectedResult = "первое слово левe второе корове")]
     [TestCase("первое слово сказала корова второе слово сказал лев", ExpectedResult = "первое слово сказала корова второе слово сказал лев")]
     public string TestConvert(string input)
     {

@@ -13,7 +13,7 @@ public static class LevDimovService
     {
         foreach (var word in words)
         {
-            if (new string(word.Where(char.IsLetter).ToArray()).ToLower() == "лев")
+            if (new string(word.Where(char.IsLetter).ToArray()).ToLower().StartsWith("лев"))
             {
                 yield return word;
             }
