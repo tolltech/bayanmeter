@@ -43,7 +43,8 @@ public class LevDimovBotDaemon : IBotDaemon
 
             var messageText = message.Text ?? string.Empty;
 
-            if (messageText.ToLower() == "лев димов")
+            if (messageText.ToLower() == "лев димов"
+                || messageText.ToLower() == "лева")
             {
                 var path = GetLevPath();
 
