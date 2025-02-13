@@ -61,6 +61,15 @@ public class LevDimovBotDaemon : IBotDaemon
                 return;
             }
 
+            if (messageText.Contains("instagram.com") && !messageText.Contains("ddinstagram.com"))
+            {
+                await client.SendTextMessageAsync(message.Chat.Id,
+                    messageText.Replace("instagram.com", "ddinstagram.com"),
+                    cancellationToken: cancellationToken,
+                    replyToMessageId: message.MessageId);
+                return;
+            }
+
             var replyMessageText = LevDimovService.Convert(messageText);
 
             log.Info($"GetNewMessage {replyMessageText} from {messageText}");
