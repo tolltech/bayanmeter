@@ -34,7 +34,7 @@ public class LevDimovBotDaemon : IBotDaemon
         try
         {
             var message = update.Message;
-            if (message == null || message.ForwardDate.HasValue || message.ReplyToMessage != null)
+            if (message == null)
             {
                 return;
             }

@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AlertBot\AlertBot.csproj" />
     <ProjectReference Include="..\BayanMeterLib\BayanMeterLib.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\KCalMeter\KCalMeter.csproj" />
