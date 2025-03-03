@@ -44,7 +44,7 @@ public class AlertBotDaemon : IBotDaemon
             if (messageText.ToLower() == "тест алерт")
             {
                 await client.SendTextMessageAsync(message.Chat.Id,
-                    "работает",
+                    $"работает в чате {message.Chat.Id}",
                     cancellationToken: cancellationToken,
                     replyToMessageId: message.MessageId);
             }
