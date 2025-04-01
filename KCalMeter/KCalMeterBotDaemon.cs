@@ -52,12 +52,7 @@ public class KCalMeterBotDaemon : IBotDaemon
                 return;
             }
 
-            var args = message.Text?
-                           .ToLower()
-                           .Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
-                           .Select(x => x.Trim())
-                           .ToArray()
-                       ?? Array.Empty<string>();
+            var args = GetArgsFromMessage(message.Text);
 
             if (args.Length <= 2 && args.Length >= 1)
             {
@@ -70,8 +65,9 @@ public class KCalMeterBotDaemon : IBotDaemon
                 }
 
                 await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
-                
-                await client.SendTextMessageAsync(message.Chat.Id, "Portion done!", cancellationToken: cancellationToken,
+
+                await client.SendTextMessageAsync(message.Chat.Id, "Portion done!",
+                    cancellationToken: cancellationToken,
                     replyToMessageId: message.MessageId);
             }
             else if (args.Length >= 5)
@@ -109,7 +105,8 @@ public class KCalMeterBotDaemon : IBotDaemon
                 await kCalMeterService.WriteFood(name, portion, foodInfo, message.Chat.Id, message.From!.Id);
                 await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
 
-                await client.SendTextMessageAsync(message.Chat.Id, "New food done!", cancellationToken: cancellationToken,
+                await client.SendTextMessageAsync(message.Chat.Id, "New food done!",
+                    cancellationToken: cancellationToken,
                     replyToMessageId: message.MessageId);
             }
             else
@@ -125,6 +122,21 @@ public class KCalMeterBotDaemon : IBotDaemon
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
+    }
+
+    public static string[] GetArgsFromMessage(string? msgText)
+    {
+        var words = msgText?
+            .ToLower()
+            .Split([" "], StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .ToArray() ?? [];
+
+        var lastDecimals = words.Reverse().TakeWhile(x => decimal.TryParse(x, out _)).Reverse().ToArray();
+
+        var args = new[] { string.Join(" ", words.Take(words.Length - lastDecimals.Length)) }.Concat(lastDecimals)
+            .ToArray();
+        return args;
     }
 
     private Task SendError(string text, ITelegramBotClient client, Message message, CancellationToken cancellationToken)
@@ -203,7 +215,7 @@ public class KCalMeterBotDaemon : IBotDaemon
         text.AppendLine(string.Join("\r\n",
             foods.OrderBy(x => x.Name)
                 .Select(x => $"{x.Name} {x.Kcal} kcal / {x.BasePortion} base portion")));
-        
+
         return text.ToString();
     }
 

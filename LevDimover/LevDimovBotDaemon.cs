@@ -4,7 +4,6 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Tolltech.TelegramCore;
-using File = Telegram.Bot.Types.File;
 
 namespace Tolltech.LevDimover;
 

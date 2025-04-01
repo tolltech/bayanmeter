@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LevDimoverTest", "LevDimove
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlertBot", "AlertBot\AlertBot.csproj", "{DC115594-7B92-45E1-B9FB-03ACD6A508DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KCallMeterTest", "KCallMeterTest\KCallMeterTest.csproj", "{073DD115-3CC2-47D3-A48F-0C76F833BD33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,10 @@ Global
 		{DC115594-7B92-45E1-B9FB-03ACD6A508DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC115594-7B92-45E1-B9FB-03ACD6A508DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC115594-7B92-45E1-B9FB-03ACD6A508DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{073DD115-3CC2-47D3-A48F-0C76F833BD33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{073DD115-3CC2-47D3-A48F-0C76F833BD33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{073DD115-3CC2-47D3-A48F-0C76F833BD33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{073DD115-3CC2-47D3-A48F-0C76F833BD33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
