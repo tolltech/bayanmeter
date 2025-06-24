@@ -7,7 +7,10 @@ using Tolltech.TelegramCore;
 
 namespace Tolltech.Counter;
 
-public class CounterBotDaemon(TelegramBotClient telegramBotClient, ITelegramClient telegramClient, ICounterService counterService)
+public class CounterBotDaemon(
+    TelegramBotClient telegramBotClient,
+    ITelegramClient telegramClient,
+    ICounterService counterService)
     : IBotDaemon
 {
     private readonly TelegramBotClient telegramBotClient = telegramBotClient;
@@ -28,21 +31,32 @@ public class CounterBotDaemon(TelegramBotClient telegramBotClient, ITelegramClie
                 return;
             }
 
-            log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
+            var chatId = message.Chat.Id;
+            log.Info($"ReceiveMessage {chatId} {message.MessageId}");
 
             var messageText = message.Text ?? string.Empty;
 
             if (!messageText.StartsWith("@")) return;
 
             var words = messageText.Split([" "], StringSplitOptions.RemoveEmptyEntries);
-            if (words.Length != 2) return;
+
+            if (words.Length > 2 || words.Length < 1) return;
 
             var userName = words[0].Substring(1);
             if (string.IsNullOrWhiteSpace(userName)) return;
+
+            if (words.Length == 1)
+            {
+                var counter = await counterService.GetCounter(userName, chatId);
+                await client.SendTextMessageAsync(chatId, $"@{userName} score is {counter ?? 0}",
+                    cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
+            }
+
+            if (words.Length != 2) return;
             if (!int.TryParse(words[1], out var number)) return;
 
-            log.Info($"Increment {userName} {message.Chat.Id} by {number}");
-            await counterService.Increment(userName, message.Chat.Id, number);
+            log.Info($"Increment {userName} {chatId} by {number}");
+            await counterService.Increment(userName, chatId, number);
         }
         catch (Exception e)
         {

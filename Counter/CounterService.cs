@@ -32,4 +32,11 @@ public class CounterService(IQueryExecutorFactory queryExecutorFactory) : ICount
             return Task.CompletedTask;
         }
     }
+
+    public Task<int?> GetCounter(string userName, long chatId)
+    {
+        var queryExecutor = queryExecutorFactory.Create<CounterHandler, CounterDbo>();
+        var existent = queryExecutor.Execute(f => f.Find(userName, chatId));
+        return Task.FromResult(existent?.Counter);
+    }
 }
