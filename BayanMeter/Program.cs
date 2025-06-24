@@ -12,6 +12,7 @@ using Telegram.Bot.Extensions.Polling;
 using Tolltech.AlertBot;
 using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.CoreLib;
+using Tolltech.Counter;
 using Tolltech.KCalMeter;
 using Tolltech.KonturPaymentsLib;
 using Tolltech.LevDimover;
@@ -63,6 +64,7 @@ namespace Tolltech.BayanMeter
             kernel.Bind<IBotDaemon>().To<KCalMeterBotDaemon>().Named("KCalMeter");
             kernel.Bind<IBotDaemon>().To<LevDimovBotDaemon>().Named("LevDimover");
             kernel.Bind<IBotDaemon>().To<AlertBotDaemon>().Named("AlertBot");
+            kernel.Bind<IBotDaemon>().To<CounterBotDaemon>().Named("CounterBot");
 
             using var cts = new CancellationTokenSource();
 

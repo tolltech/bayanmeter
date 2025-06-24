@@ -95,3 +95,15 @@ CREATE INDEX IF NOT EXISTS food_messages_user_id_message_date on food_messages (
 CREATE INDEX IF NOT EXISTS food_messages_chat_id_message_date on food_messages (chat_id, message_date);
 
 ALTER TABLE foods ADD COLUMN IF NOT EXISTS timestamp bigint default 0;
+
+CREATE TABLE IF NOT EXISTS counters(
+   id varchar PRIMARY KEY NOT NULL,
+   user_name varchar NOT NULL,
+   chat_id bigint NOT NULL,
+   counter int NOT NULL,
+   timestamp bigint NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS ix_counters_user_name ON counters (user_name);
+CREATE INDEX IF NOT EXISTS ix_counters_chat_id ON counters (chat_id);
+CREATE INDEX IF NOT EXISTS ix_counters_timestamp ON counters (timestamp);

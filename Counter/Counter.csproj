@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Tolltech.Counter</AssemblyName>
+        <RootNamespace>Tolltech.Counter</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PostgreEF\PostgreEF.csproj" />
+      <ProjectReference Include="..\TelegramCore\TelegramCore.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="log4net" Version="2.0.11" />
+    </ItemGroup>
+
+</Project>

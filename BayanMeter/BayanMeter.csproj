@@ -32,6 +32,7 @@
     <ProjectReference Include="..\AlertBot\AlertBot.csproj" />
     <ProjectReference Include="..\BayanMeterLib\BayanMeterLib.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Counter\Counter.csproj" />
     <ProjectReference Include="..\KCalMeter\KCalMeter.csproj" />
     <ProjectReference Include="..\KonturPaymentsLib\KonturPaymentsLib.csproj" />
     <ProjectReference Include="..\LevDimover\LevDimover.csproj" />
