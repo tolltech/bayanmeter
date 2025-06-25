@@ -39,4 +39,11 @@ public class CounterService(IQueryExecutorFactory queryExecutorFactory) : ICount
         var existent = queryExecutor.Execute(f => f.Find(userName, chatId));
         return Task.FromResult(existent?.Counter);
     }
+
+    public Task<(string Username, int Score)[]> GetCounters(long chatId)
+    {
+        var queryExecutor = queryExecutorFactory.Create<CounterHandler, CounterDbo>();
+        var counters = queryExecutor.Execute(f => f.Select(chatId));
+        return Task.FromResult(counters.Select(x => (x.UserName, x.Counter)).ToArray());
+    }
 }

@@ -36,6 +36,29 @@ public class CounterBotDaemon(
 
             var messageText = message.Text ?? string.Empty;
 
+            if (messageText.StartsWith("/"))
+            {
+                if (messageText.StartsWith("/scores"))
+                {
+                    var counters = await counterService.GetCounters(chatId);
+                    var msg = string.Join(Environment.NewLine, counters.Select(x => $"{x.Username} {x.Score}"));
+                    await client.SendTextMessageAsync(chatId, msg,
+                        cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
+                }
+                else if (messageText.StartsWith("/my_score"))
+                {
+                    var fromUserName = message.From?.Username;
+                    if (fromUserName == null)
+                    {
+                        return;
+                    }
+                    
+                    var userScoreText = await BuildUserScoreText(fromUserName, chatId);
+                    await client.SendTextMessageAsync(chatId, userScoreText, cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
+                }
+                return;
+            }
+
             if (!messageText.StartsWith("@")) return;
 
             var words = messageText.Split([" "], StringSplitOptions.RemoveEmptyEntries);
@@ -47,8 +70,8 @@ public class CounterBotDaemon(
 
             if (words.Length == 1)
             {
-                var counter = await counterService.GetCounter(userName, chatId);
-                await client.SendTextMessageAsync(chatId, $"@{userName} score is {counter ?? 0}",
+                var userScoreText = await BuildUserScoreText(userName, chatId);
+                await client.SendTextMessageAsync(chatId, userScoreText,
                     cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
             }
 
@@ -66,6 +89,13 @@ public class CounterBotDaemon(
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
+    }
+
+    private async Task<string> BuildUserScoreText(string userName, long chatId)
+    {
+        var counter = await counterService.GetCounter(userName, chatId);
+        var userScoreText = $"@{userName} score is {counter ?? 0}";
+        return userScoreText;
     }
 
     public Task HandleErrorAsync(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken)

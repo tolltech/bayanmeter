@@ -41,4 +41,9 @@ public class CounterHandler : SqlHandlerBase<CounterDbo>
         var result = dataContext.Table.FirstOrDefault(x => x.Id == key);
         return result;
     }
+
+    public CounterDbo[] Select(long chatId)
+    {
+        return dataContext.Table.Where(x => x.ChatId == chatId).OrderByDescending(x => x.Counter).ToArray();
+    }
 }
