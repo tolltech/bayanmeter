@@ -52,10 +52,22 @@ public class CounterBotDaemon(
                     {
                         return;
                     }
-                    
+
                     var userScoreText = await BuildUserScoreText(fromUserName, chatId);
-                    await client.SendTextMessageAsync(chatId, userScoreText, cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
+                    await client.SendTextMessageAsync(chatId, userScoreText, cancellationToken: cancellationToken,
+                        replyToMessageId: message.MessageId);
                 }
+
+                return;
+            }
+
+            if (int.TryParse(messageText.Trim(), out var score))
+            {
+                var fromUsername = message.From?.Username;
+                if (fromUsername == null) return;
+
+                log.Info($"Increment {fromUsername} {chatId} by {score}");
+                await counterService.Increment(fromUsername, chatId, score);
                 return;
             }
 
