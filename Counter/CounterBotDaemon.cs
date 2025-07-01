@@ -53,9 +53,7 @@ public class CounterBotDaemon(
                         return;
                     }
 
-                    var userScoreText = await BuildUserScoreText(fromUserName, chatId);
-                    await client.SendTextMessageAsync(chatId, userScoreText, cancellationToken: cancellationToken,
-                        replyToMessageId: message.MessageId);
+                    await SendUserScore(client, cancellationToken, fromUserName, chatId, message.MessageId);
                 }
 
                 return;
@@ -68,6 +66,7 @@ public class CounterBotDaemon(
 
                 log.Info($"Increment {fromUsername} {chatId} by {score}");
                 await counterService.Increment(fromUsername, chatId, score);
+                await SendUserScore(client, cancellationToken, fromUsername, chatId, message.MessageId);
                 return;
             }
 
@@ -82,9 +81,7 @@ public class CounterBotDaemon(
 
             if (words.Length == 1)
             {
-                var userScoreText = await BuildUserScoreText(userName, chatId);
-                await client.SendTextMessageAsync(chatId, userScoreText,
-                    cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
+                await SendUserScore(client, cancellationToken, userName, chatId, message.MessageId);
             }
 
             if (words.Length != 2) return;
@@ -92,6 +89,7 @@ public class CounterBotDaemon(
 
             log.Info($"Increment {userName} {chatId} by {number}");
             await counterService.Increment(userName, chatId, number);
+            await SendUserScore(client, cancellationToken, userName, chatId, message.MessageId);
         }
         catch (Exception e)
         {
@@ -101,6 +99,14 @@ public class CounterBotDaemon(
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
+    }
+
+    private async Task SendUserScore(ITelegramBotClient client, CancellationToken cancellationToken, string userName,
+        long chatId, int messageId)
+    {
+        var userScoreText = await BuildUserScoreText(userName, chatId);
+        await client.SendTextMessageAsync(chatId, userScoreText, cancellationToken: cancellationToken,
+            replyToMessageId: messageId);
     }
 
     private async Task<string> BuildUserScoreText(string userName, long chatId)
