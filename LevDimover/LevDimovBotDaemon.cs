@@ -60,10 +60,11 @@ public class LevDimovBotDaemon : IBotDaemon
                 return;
             }
 
-            if (messageText.Contains("instagram.com") && !messageText.Contains("ddinstagram.com"))
+            if (messageText.Contains("instagram.com") && !messageText.Contains("ddinstagram.com")
+                || (messageText.Contains("instagram.com") && !messageText.Contains("kkinstagram.com")))
             {
                 await client.SendTextMessageAsync(message.Chat.Id,
-                    messageText.Replace("instagram.com", "ddinstagram.com"),
+                    messageText.Replace("instagram.com", "kkinstagram.com"),
                     cancellationToken: cancellationToken,
                     replyToMessageId: message.MessageId);
                 return;
