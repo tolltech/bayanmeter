@@ -16,6 +16,7 @@ using Tolltech.Counter;
 using Tolltech.KCalMeter;
 using Tolltech.KonturPaymentsLib;
 using Tolltech.LevDimover;
+using Tolltech.Planny;
 using Tolltech.Storer;
 
 namespace Tolltech.BayanMeter
@@ -65,6 +66,7 @@ namespace Tolltech.BayanMeter
             kernel.Bind<IBotDaemon>().To<LevDimovBotDaemon>().Named("LevDimover");
             kernel.Bind<IBotDaemon>().To<AlertBotDaemon>().Named("AlertBot");
             kernel.Bind<IBotDaemon>().To<CounterBotDaemon>().Named("CounterBot");
+            kernel.Bind<IBotDaemon>().To<PlannyBotDaemon>().Named("Planny");
 
             using var cts = new CancellationTokenSource();
 
