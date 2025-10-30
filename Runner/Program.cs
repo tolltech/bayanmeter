@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using Tolltech.Core;
 using Tolltech.CoreLib;
 using Tolltech.Planny;
 using Tolltech.PostgreEF.Integration;

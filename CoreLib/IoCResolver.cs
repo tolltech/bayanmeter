@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Tolltech.Core
+namespace Tolltech.CoreLib
 {
     public static class IoCResolver
     {
@@ -12,7 +12,7 @@ namespace Tolltech.Core
         public static void Resolve(Action<Type, Type> resolve, HashSet<Type> ignoreTypes = null, params string[] assemblyNames)
         {
 
-            ignoreTypes ??= emptyTypeHashset;
+            ignoreTypes = ignoreTypes ?? emptyTypeHashset;
 
             var assemblyNameHashSet = new HashSet<string>(assemblyNames);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()

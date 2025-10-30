@@ -8,6 +8,7 @@ using log4net.Core;
 using log4net.Layout;
 using log4net.Repository.Hierarchy;
 using Ninject.Modules;
+using Tolltech.CoreLib;
 
 namespace Tolltech.Core
 {
