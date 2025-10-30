@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KCallMeterTest", "KCallMete
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Counter", "Counter\Counter.csproj", "{3DA8FF96-F5E0-437E-9EAE-36F285F38192}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planny", "Planny\Planny.csproj", "{4C21D227-106A-4D15-A0FD-D429D3770A5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{3DA8FF96-F5E0-437E-9EAE-36F285F38192}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DA8FF96-F5E0-437E-9EAE-36F285F38192}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DA8FF96-F5E0-437E-9EAE-36F285F38192}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C21D227-106A-4D15-A0FD-D429D3770A5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C21D227-106A-4D15-A0FD-D429D3770A5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C21D227-106A-4D15-A0FD-D429D3770A5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C21D227-106A-4D15-A0FD-D429D3770A5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

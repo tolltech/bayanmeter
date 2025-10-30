@@ -107,3 +107,18 @@ CREATE TABLE IF NOT EXISTS counters(
 CREATE INDEX IF NOT EXISTS ix_counters_user_name ON counters (user_name);
 CREATE INDEX IF NOT EXISTS ix_counters_chat_id ON counters (chat_id);
 CREATE INDEX IF NOT EXISTS ix_counters_timestamp ON counters (timestamp);
+
+CREATE TABLE IF NOT EXISTS plans(
+    id uuid PRIMARY KEY NOT NULL,
+    chat_id bigint NOT NULL,
+    name varchar NULL,
+    from_message_id bigint NOT NULL,
+    from_user_id bigint NOT NULL,
+    create_date timestamptz NOT NULL
+    from_user_name varchar NULL,
+    timestamp bigint NULL,
+    cron varchar NOT NULL,
+    cron_description varchar NOT NULL
+);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_plans_chat_id_name ON plans (chat_id, name);
