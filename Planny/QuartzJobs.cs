@@ -1,16 +1,16 @@
-﻿using log4net;
-using Quartz;
+﻿using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using Telegram.Bot;
+using Vostok.Logging.Abstractions;
 
 namespace Tolltech.Planny;
 
-public class PlanJobFactory(TelegramBotClient telegramBotClient) : IJobFactory
+public class PlanJobFactory(TelegramBotClient telegramBotClient, ILog log) : IJobFactory
 {
     public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
     {
-        return new PlanJob(telegramBotClient);
+        return new PlanJob(telegramBotClient, log);
     }
 
     public void ReturnJob(IJob job)
@@ -18,10 +18,8 @@ public class PlanJobFactory(TelegramBotClient telegramBotClient) : IJobFactory
     }
 }
 
-public class PlanJob(TelegramBotClient telegramBotClient) : IJob
+public class PlanJob(TelegramBotClient telegramBotClient, ILog log) : IJob
 {
-    private static readonly ILog log = LogManager.GetLogger(typeof(PlanJob));
-    
     public async Task Execute(IJobExecutionContext context)
     {
         try
@@ -35,15 +33,13 @@ public class PlanJob(TelegramBotClient telegramBotClient) : IJob
         }
         catch (Exception e)
         {
-            log.Error($"Error while doing planny job", e);
+            log.Error(e, $"Error while doing planny job");
         }
     }
 }
 
-public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFactory)
+public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFactory, ILog log)
 {
-    private static readonly ILog log = LogManager.GetLogger(typeof(PlannyBotDaemon));
-
     public async Task Run()
     {
         try
@@ -78,13 +74,13 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
                 }
                 catch (Exception e)
                 {
-                    log.Error($"Fail to schedule {plan.Name} {plan.Id}", e);
+                    log.Error(e, $"Fail to schedule {plan.Name} {plan.Id}");
                 }
             }
         }
         catch (Exception e)
         {
-            log.Error($"Scheduler didn't start", e);
+            log.Error(e, $"Scheduler didn't start");
         }
     }
 }

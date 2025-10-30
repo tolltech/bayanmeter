@@ -1,0 +1,15 @@
+﻿CREATE TABLE IF NOT EXISTS plans(
+    id uuid PRIMARY KEY NOT NULL,
+    chat_id bigint NOT NULL,
+    name varchar NULL,
+    from_message_id bigint NOT NULL,
+    from_user_id bigint NOT NULL,
+    create_date timestamptz NOT NULL
+    from_user_name varchar NULL,
+    timestamp bigint NULL,
+    cron varchar NOT NULL,
+    cron_description varchar NOT NULL
+);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_plans_chat_id_name ON plans (chat_id, name);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_plans_timestamp ON plans (timestamp);

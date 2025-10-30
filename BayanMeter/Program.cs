@@ -66,7 +66,6 @@ namespace Tolltech.BayanMeter
             kernel.Bind<IBotDaemon>().To<LevDimovBotDaemon>().Named("LevDimover");
             kernel.Bind<IBotDaemon>().To<AlertBotDaemon>().Named("AlertBot");
             kernel.Bind<IBotDaemon>().To<CounterBotDaemon>().Named("CounterBot");
-            kernel.Bind<IBotDaemon>().To<PlannyBotDaemon>().Named("Planny");
 
             using var cts = new CancellationTokenSource();
 
@@ -82,12 +81,6 @@ namespace Tolltech.BayanMeter
                 {
                     AllowedUpdates = { } // receive all update types
                 };
-
-                if (botSetting.BotName == "Planny")
-                {
-                    kernel.Bind<PlanJobFactory>().ToConstant(new PlanJobFactory(client));
-                    kernel.Bind<PlannyJobRunner>().ToSelf().InSingletonScope();
-                }
                 
                 kernel.Bind<TelegramBotClient>().ToConstant(client).WhenAnyAncestorNamed(botSetting.BotName);
                 kernel.Bind<CustomSettings>().ToConstant(new CustomSettings

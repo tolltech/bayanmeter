@@ -1,20 +1,22 @@
 ﻿using CronExpressionDescriptor;
 using Cronos;
-using log4net;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Tolltech.TelegramCore;
+using Vostok.Logging.Abstractions;
 
 namespace Tolltech.Planny;
 
 public class PlannyBotDaemon(
     TelegramBotClient telegramBotClient,
     ITelegramClient telegramClient,
-    IPlanService planService) : IBotDaemon
+    IPlanService planService,
+    ILog log) : IBotDaemon
 {
-    private static readonly ILog log = LogManager.GetLogger(typeof(PlannyBotDaemon));
+    public static readonly string Key = "Planny";
+    
 
     public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
     {
