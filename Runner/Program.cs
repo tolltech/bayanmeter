@@ -42,7 +42,7 @@ var ignoreTypes = new HashSet<Type>
 };
 IoCResolver.Resolve((@interface, implementation) => services.AddSingleton(@interface, implementation), ignoreTypes, "Tolltech");
 
-Console.WriteLine($"Start Bots {DateTime.Now}");
+log.Info($"Start Bots {DateTime.Now}");
 
 var argsFileName = "args.txt";
 var botSettingsStr = args.Length > 0 ? args[0] :
@@ -52,12 +52,12 @@ var appSettings = JsonConvert.DeserializeObject<AppSettings>(botSettingsStr)!;
 
 var connectionString = appSettings.ConnectionString;
 
-Console.WriteLine($"Read {connectionString} connectionString");
+log.Info($"Read {connectionString} connectionString");
 
 services.AddSingleton<IConnectionString>(new ConnectionString(connectionString));
 
 var botSettings = appSettings.BotSettings;
-Console.WriteLine($"Read {botSettings.Length} bot settings");
+log.Info($"Read {botSettings.Length} bot settings");
 
 services.AddKeyedSingleton<IBotDaemon, PlannyBotDaemon>(PlannyBotDaemon.Key);
 
@@ -67,7 +67,7 @@ foreach (var botSetting in botSettings)
 {
     var token = botSetting.Token;
  
-    Console.WriteLine($"Start bot {token}");
+    log.Info($"Configure bot {token}");
 
     var client = new TelegramBotClient(token);
 
@@ -84,10 +84,9 @@ foreach (var botSetting in botSettings)
     });
 }
 
+log.Info("Building app");
 using var host = builder.Build();
-
-var jobRunner = host.Services.GetRequiredService<PlannyJobRunner>();
-await jobRunner.Run();
+log.Info("Built app");
 
 foreach (var botSetting in botSettings)
 {
@@ -121,8 +120,14 @@ foreach (var botSetting in botSettings)
     log.Info($"Start listening for @{me.Username}");
 }
 
-// Run the application
+log.Info($"Running planny job");
+var jobRunner = host.Services.GetRequiredService<PlannyJobRunner>();
+await jobRunner.Run();
+log.Info($"Run planny job");
+
+log.Info($"Running host");
 await host.RunAsync();
+log.Info($"Run host");
 
 Console.ReadLine();
 

@@ -1,5 +1,6 @@
 ﻿using CronExpressionDescriptor;
 using Cronos;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
@@ -10,12 +11,11 @@ using Vostok.Logging.Abstractions;
 namespace Tolltech.Planny;
 
 public class PlannyBotDaemon(
-    TelegramBotClient telegramBotClient,
-    ITelegramClient telegramClient,
+    [FromKeyedServices(PlannyBotDaemon.Key)]TelegramBotClient telegramBotClient,
     IPlanService planService,
     ILog log) : IBotDaemon
 {
-    public static readonly string Key = "Planny";
+    public const string Key = "Planny";
     
 
     public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)

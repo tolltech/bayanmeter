@@ -10,5 +10,5 @@ public class BotSettings
 {
     public required string Token { get; set; }
     public required string BotName { get; set; }
-    public required string CustomSettings { get; set; }
+    public string? CustomSettings { get; set; }
 }
