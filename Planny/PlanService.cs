@@ -14,7 +14,7 @@ public class PlanService(IDataContextFactory dbContextFactory) : IPlanService
                 x.Name == plan.Name && x.ChatId == plan.ChatId
                 || x.Id == plan.Id
             );
-            
+
             if (existent != null)
             {
                 context.Plans.Remove(existent);
@@ -24,5 +24,11 @@ public class PlanService(IDataContextFactory dbContextFactory) : IPlanService
         }
 
         await context.SaveChangesAsync();
+    }
+
+    public async Task<PlanDbo[]> SelectAll(int count = 1000)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        return await context.Plans.OrderByDescending(x => x.Timestamp).Take(count).ToArrayAsync();
     }
 }

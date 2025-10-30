@@ -26,7 +26,7 @@ public class PlanDbo
 
     [Column("from_user_name", TypeName = "varchar")]
     public required string FromUserName { get; set; }
-
+    
     [Column("timestamp", TypeName = "bigint")]
     public long Timestamp { get; set; }
     

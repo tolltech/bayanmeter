@@ -83,6 +83,12 @@ namespace Tolltech.BayanMeter
                     AllowedUpdates = { } // receive all update types
                 };
 
+                if (botSetting.BotName == "Planny")
+                {
+                    kernel.Bind<PlanJobFactory>().ToConstant(new PlanJobFactory(client));
+                    kernel.Bind<PlannyJobRunner>().ToSelf().InSingletonScope();
+                }
+                
                 kernel.Bind<TelegramBotClient>().ToConstant(client).WhenAnyAncestorNamed(botSetting.BotName);
                 kernel.Bind<CustomSettings>().ToConstant(new CustomSettings
                 {
@@ -101,6 +107,9 @@ namespace Tolltech.BayanMeter
                 Console.WriteLine($"Start listening for @{me.Username}");
             }
 
+            var jobRunner = kernel.Get<PlannyJobRunner>();
+            jobRunner.Run().GetAwaiter().GetResult();
+            
             Console.ReadLine();
 
             cts.Cancel();
