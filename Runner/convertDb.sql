@@ -4,7 +4,7 @@
     name varchar NULL,
     from_message_id bigint NOT NULL,
     from_user_id bigint NOT NULL,
-    create_date timestamptz NOT NULL
+    create_date timestamptz NOT NULL,
     from_user_name varchar NULL,
     timestamp bigint NULL,
     cron varchar NOT NULL,
