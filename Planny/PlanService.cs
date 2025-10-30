@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Tolltech.Planny;
 
-public class PlanService(IDataContextFactory<PlannyContext> dbContextFactory) : IPlanService
+public class PlanService(IDataContextFactory dbContextFactory) : IPlanService
 {
     public async Task CreateOrUpdateByNameAndChat(params PlanDbo[] plans)
     {

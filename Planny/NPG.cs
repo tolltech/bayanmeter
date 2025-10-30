@@ -3,30 +3,28 @@ using Tolltech.PostgreEF.Integration;
 
 namespace Tolltech.Planny;
 
-public interface IDataContextFactory<TContext> where TContext : DbContext
+public interface IDataContextFactory
 {
-    TContext CreateDbContext();
-    Task<TContext> CreateDbContextAsync();
+    Task<PlannyContext> CreateDbContextAsync();
 }
 
-public class NpgSqlDataContextFactory<TContext> : IDataContextFactory<TContext> 
-    where TContext : DbContext
+public class NpgSqlDataContextFactory : IDataContextFactory 
 {
-    private readonly DbContextOptions<TContext> _options;
+    private readonly DbContextOptions<PlannyContext> _options;
 
     public NpgSqlDataContextFactory(IConnectionString connectionString)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<PlannyContext>();
         optionsBuilder.UseNpgsql(connectionString.Value);
         _options = optionsBuilder.Options;
     }
 
-    public TContext CreateDbContext()
+    private PlannyContext CreateDbContext()
     {
-        return (TContext)Activator.CreateInstance(typeof(TContext), _options)!;
+        return new PlannyContext(_options);
     }
 
-    public async Task<TContext> CreateDbContextAsync()
+    public async Task<PlannyContext> CreateDbContextAsync()
     {
         return await Task.FromResult(CreateDbContext());
     }
