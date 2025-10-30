@@ -16,7 +16,6 @@ using Tolltech.Counter;
 using Tolltech.KCalMeter;
 using Tolltech.KonturPaymentsLib;
 using Tolltech.LevDimover;
-using Tolltech.Planny;
 using Tolltech.Storer;
 
 namespace Tolltech.BayanMeter
@@ -99,9 +98,6 @@ namespace Tolltech.BayanMeter
 
                 Console.WriteLine($"Start listening for @{me.Username}");
             }
-
-            var jobRunner = kernel.Get<PlannyJobRunner>();
-            jobRunner.Run().GetAwaiter().GetResult();
             
             Console.ReadLine();
 
