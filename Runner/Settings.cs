@@ -1,4 +1,4 @@
-﻿namespace Tolltech.BotRunner;
+﻿namespace Tolltech.Runner;
 
 public class AppSettings
 {

@@ -5,8 +5,8 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblyName>Tolltech.BotRunner</AssemblyName>
-        <RootNamespace>Tolltech.BotRunner</RootNamespace>
+        <AssemblyName>Tolltech.Runner</AssemblyName>
+        <RootNamespace>Tolltech.Runner</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using Tolltech.PostgreEF.Integration;
 
-namespace Tolltech.BotRunner.Psql
+namespace Tolltech.Runner.Psql
 {
     public class ConnectionString(string connectionString) : IConnectionString
     {
