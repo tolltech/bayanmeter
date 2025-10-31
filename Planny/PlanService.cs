@@ -31,4 +31,24 @@ public class PlanService(IDataContextFactory dbContextFactory) : IPlanService
         await using var context = await dbContextFactory.CreateDbContextAsync();
         return await context.Plans.OrderByDescending(x => x.Timestamp).Take(count).ToArrayAsync();
     }
+
+    public async Task<PlanDbo[]> SelectByChatId(long chatId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        return await context.Plans.Where(x => x.ChatId == chatId).OrderByDescending(x => x.Timestamp).ToArrayAsync();
+    }
+
+    public async Task<PlanDbo?> DeleteByIdOrChatAndName(int intId, long chatId, string name)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var existent = await context.Plans.FirstOrDefaultAsync(x => (x.IntId == intId || x.Name == name) && x.ChatId == chatId);
+        if (existent == null)
+        {
+            return null;
+        }
+        
+        context.Plans.Remove(existent);
+        await context.SaveChangesAsync();
+        return existent;
+    }
 }

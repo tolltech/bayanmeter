@@ -10,10 +10,15 @@ namespace Tolltech.CoreLib.Helpers
         {
             return src.GetArguments().ElementAt(argumentNumber);
         }
-        
+
         public static IEnumerable<string> GetArguments(this string src)
         {
             return src.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries).Skip(1);
+        }
+
+        public static string JoinToString<T>(this IEnumerable<T> src, string separator = ",")
+        {
+            return string.Join(separator, src);
         }
     }
 }

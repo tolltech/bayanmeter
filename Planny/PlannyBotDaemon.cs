@@ -5,18 +5,20 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Tolltech.CoreLib.Helpers;
 using Tolltech.TelegramCore;
 using Vostok.Logging.Abstractions;
 
 namespace Tolltech.Planny;
 
 public class PlannyBotDaemon(
-    [FromKeyedServices(PlannyBotDaemon.Key)]TelegramBotClient telegramBotClient,
+    [FromKeyedServices(PlannyBotDaemon.Key)]
+    TelegramBotClient telegramBotClient,
     IPlanService planService,
     ILog log) : IBotDaemon
 {
     public const string Key = "Planny";
-    
+
 
     public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
     {
@@ -45,6 +47,14 @@ public class PlannyBotDaemon(
             {
                 replyMessageText = CreateNewPlan(messageText, message);
             }
+            else if (messageText.StartsWith("/all"))
+            {
+                replyMessageText = await GetAllPlans(message);
+            }
+            else if (messageText.StartsWith("/delete"))
+            {
+                replyMessageText = await DeletePlan(message, messageText);
+            }
 
             await client.SendTextMessageAsync(message.Chat.Id, replyMessageText,
                 cancellationToken: cancellationToken,
@@ -52,12 +62,32 @@ public class PlannyBotDaemon(
         }
         catch (Exception e)
         {
-            log.Error("BotDaemonException", e);
+            log.Error(e, "BotDaemonException");
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
+    }
+
+    private async Task<string> DeletePlan(Message message, string messageText)
+    {
+        var arg = new string(messageText.SkipWhile(x => x != ' ').ToArray()).Trim();
+        if (!int.TryParse(arg, out var intId) && string.IsNullOrWhiteSpace(arg))
+        {
+            return "Wrong plan number";
+        }
+
+        var plan = await planService.DeleteByIdOrChatAndName(intId, message.Chat.Id, arg);
+        return $"Removed plan {plan?.IntId} {plan?.Name}";
+    }
+
+    private async Task<string> GetAllPlans(Message message)
+    {
+        var chatPlans = await planService.SelectByChatId(message.Chat.Id);
+        return chatPlans
+            .Select(x => $"{x.IntId} {x.Name}")
+            .JoinToString(Environment.NewLine);
     }
 
     private string CreateNewPlan(string messageText, Message message)
@@ -109,7 +139,7 @@ public class PlannyBotDaemon(
             Cron = cron,
             CronDescription = descriptor
         };
-        
+
         planService.CreateOrUpdateByNameAndChat(plan);
 
         return $"Create {rawName.Trim()} with {descriptor}. Next run is {nextUtc.Value:s}";
@@ -124,7 +154,7 @@ public class PlannyBotDaemon(
             _ => exception.ToString()
         };
 
-        log.Error("BotDaemonException", exception);
+        log.Error(exception, "BotDaemonException");
         Console.WriteLine($"BotDaemonException: {errorMessage} {exception.StackTrace}");
         return Task.CompletedTask;
     }
