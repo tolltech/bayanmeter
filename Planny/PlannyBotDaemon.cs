@@ -86,7 +86,8 @@ public class PlannyBotDaemon(
     {
         var chatPlans = await planService.SelectByChatId(message.Chat.Id);
         return chatPlans
-            .Select(x => $"{x.IntId} {x.Name}")
+            .Select(x =>
+                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron)} next run {CronExtensions.NextRun(x.Cron)}")
             .JoinToString(Environment.NewLine);
     }
 
