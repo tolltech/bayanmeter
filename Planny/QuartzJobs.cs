@@ -44,7 +44,11 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
     {
         try
         {
+            log.Info($"Getting plans for job");
+            
             var plans = await planService.SelectAll();
+
+            log.Info($"Got {plans.Length} plans");
 
             var schedulerFactory = new StdSchedulerFactory();
             var scheduler = await schedulerFactory.GetScheduler();
