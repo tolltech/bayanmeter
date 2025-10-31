@@ -40,8 +40,13 @@ public class PlanJob(TelegramBotClient telegramBotClient, ILog log) : IJob
 
 public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFactory, ILog log)
 {
-    public async Task Run()
+    private static readonly HashSet<Guid> runPlanIds = new();
+    private static IScheduler? scheduler;
+    private static readonly object locker = new();
+
+    public async Task<int> Run()
     {
+        var result = 0;
         try
         {
             log.Info($"Getting plans for job");
@@ -51,14 +56,29 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
             log.Info($"Got {plans.Length} plans");
 
             var schedulerFactory = new StdSchedulerFactory();
-            var scheduler = await schedulerFactory.GetScheduler();
-            scheduler.JobFactory = planJobFactory;
-            await scheduler.Start();
-
+            if (scheduler == null)
+            {
+                var newScheduler = await schedulerFactory.GetScheduler();
+                newScheduler.JobFactory = planJobFactory;
+                await newScheduler.Start();
+                if (scheduler == null)
+                {
+                    lock (locker)
+                    {
+                        scheduler ??= newScheduler;
+                    }
+                }
+            }
+            
             foreach (var plan in plans)
             {
                 try
                 {
+                    if (runPlanIds.Contains(plan.Id))
+                    {
+                        continue;
+                    }
+
                     log.Info($"Scheduling {plan.Name} {plan.Id}");
 
                     var job = JobBuilder.Create<PlanJob>()
@@ -76,9 +96,11 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
                         .WithIdentity(plan.Id.ToString(), plan.ChatId.ToString())
                         .WithCronSchedule(quartzCron)
                         .Build();
-                    
+
                     log.Info($"Scheduled {plan.Name} {plan.Id}");
                     await scheduler.ScheduleJob(job, trigger);
+                    result++;
+                    runPlanIds.Add(plan.Id);
 
                     if (!Cronos.CronExpression.TryParse(plan.Cron, out var expression))
                     {
@@ -111,5 +133,7 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
         {
             log.Error(e, $"Scheduler didn't start");
         }
+        
+        return result;
     }
 }

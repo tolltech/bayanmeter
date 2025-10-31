@@ -9,6 +9,10 @@ public class PlanDbo
     [Column("id", TypeName = "uuid"), Key, Required]
     public Guid Id { get; set; }
     
+    [Column("int_id", TypeName = "int"), ConcurrencyCheck, Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int IntId { get; set; }
+    
     [Column("chat_id", TypeName = "bigint"), Required]
     public long ChatId { get; set; }
 

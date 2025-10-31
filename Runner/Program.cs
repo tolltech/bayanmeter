@@ -84,6 +84,8 @@ foreach (var botSetting in botSettings)
     });
 }
 
+services.AddHostedService<PlanUpdater>();
+
 log.Info("Building app");
 using var host = builder.Build();
 log.Info("Built app");
@@ -119,11 +121,6 @@ foreach (var botSetting in botSettings)
 
     log.Info($"Start listening for @{me.Username}");
 }
-
-log.Info($"Running planny job");
-var jobRunner = host.Services.GetRequiredService<PlannyJobRunner>();
-await jobRunner.Run();
-log.Info($"Run planny job");
 
 log.Info($"Running host");
 await host.RunAsync();
