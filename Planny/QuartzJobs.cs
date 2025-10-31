@@ -45,7 +45,7 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
         try
         {
             log.Info($"Getting plans for job");
-            
+
             var plans = await planService.SelectAll();
 
             log.Info($"Got {plans.Length} plans");
@@ -60,19 +60,44 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
                 try
                 {
                     log.Info($"Scheduling {plan.Name} {plan.Id}");
-                    
+
                     var job = JobBuilder.Create<PlanJob>()
                         .WithIdentity(plan.Id.ToString(), plan.ChatId.ToString())
                         .UsingJobData(nameof(plan.ChatId), plan.ChatId)
                         .UsingJobData(nameof(plan.Name), plan.Name)
                         .Build();
 
+                    if (!CronConverter.TryConvertUnixToQuartz(plan.Cron, out var quartzCron))
+                    {
+                        log.Error($"Can't convert cron to quartz {plan.Cron} {plan.Name} {plan.Id}");
+                    }
+
                     var trigger = TriggerBuilder.Create()
                         .WithIdentity(plan.Id.ToString(), plan.ChatId.ToString())
-                        .WithCronSchedule(plan.Cron)
+                        .WithCronSchedule(quartzCron)
                         .Build();
 
-                    
+                    if (!Cronos.CronExpression.TryParse(plan.Cron, out var expression))
+                    {
+                        log.Error($"Error: Wrong format of cron {plan.Cron} {plan.Name} {plan.Id}");
+                    }
+                    else
+                    {
+                        var nextQuartz = trigger.GetNextFireTimeUtc();
+                        var nextUnix = expression.GetNextOccurrence(DateTime.UtcNow);
+
+                        if (nextQuartz?.Date != nextUnix?.Date
+                            || nextQuartz?.Hour != nextUnix?.Hour
+                            || nextQuartz?.Minute != nextUnix?.Minute)
+                        {
+                            log.Error($"Different trigger time cron {nextUnix:s} quartz {nextQuartz:s}");
+                        }
+                        else
+                        {
+                            log.Info($"Next occurrences are the same {plan.Cron} {plan.Name} {plan.Id}");
+                        }
+                    }
+
                     log.Info($"Scheduled {plan.Name} {plan.Id}");
                     await scheduler.ScheduleJob(job, trigger);
                 }
