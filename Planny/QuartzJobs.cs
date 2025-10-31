@@ -76,6 +76,9 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
                         .WithIdentity(plan.Id.ToString(), plan.ChatId.ToString())
                         .WithCronSchedule(quartzCron)
                         .Build();
+                    
+                    log.Info($"Scheduled {plan.Name} {plan.Id}");
+                    await scheduler.ScheduleJob(job, trigger);
 
                     if (!Cronos.CronExpression.TryParse(plan.Cron, out var expression))
                     {
@@ -97,9 +100,6 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
                             log.Info($"Next occurrences are the same {plan.Cron} {plan.Name} {plan.Id}");
                         }
                     }
-
-                    log.Info($"Scheduled {plan.Name} {plan.Id}");
-                    await scheduler.ScheduleJob(job, trigger);
                 }
                 catch (Exception e)
                 {
