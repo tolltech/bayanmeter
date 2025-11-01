@@ -228,7 +228,7 @@ public class PlannyBotDaemon(
             return $"Too often cron {newCron}";
         }
 
-        var descriptor = CronExtensions.GetCronDescription(cron, chatSettings?.Settings.Locale ?? "en");
+        var descriptor = CronExtensions.GetCronDescription(cron, chatSettings?.Settings.Locale ?? "en", -offset);
 
         var plan = new PlanDbo
         {
