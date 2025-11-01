@@ -15,7 +15,7 @@ public class PlannyBotDaemon(
     [FromKeyedServices(PlannyBotDaemon.Key)]
     TelegramBotClient telegramBotClient,
     IPlanService planService,
-    PlannyJobRunner  plannyJobRunner,
+    PlannyJobRunner plannyJobRunner,
     ILog log) : IBotDaemon
 {
     public const string Key = "Planny";
@@ -33,7 +33,7 @@ public class PlannyBotDaemon(
             {
                 return;
             }
-            
+
             log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
             var messageText = message.Text ?? string.Empty;
@@ -113,26 +113,44 @@ public class PlannyBotDaemon(
             return "Error: Empty name of plan";
         }
 
-        var cron = new string(messageText.Replace(rawName, string.Empty).SkipWhile(x => x != ',').Skip(1)
+        var cronSource = new string(messageText.Replace(rawName, string.Empty).SkipWhile(x => x != ',').Skip(1)
             .TakeWhile(_ => true).ToArray()).Trim();
 
-        if (string.IsNullOrWhiteSpace(cron))
+        if (string.IsNullOrWhiteSpace(cronSource))
         {
             return "Error: Empty cron of plan";
         }
 
         //(minute, hour, dayOfMonth, month, dayOfWeek)
-
-        if (!CronExpression.TryParse(cron, out var expression))
+        string? cron;
+        CronExpression? cronExpression;
+        if (CronExpression.TryParse(cronSource, out var expression))
         {
-            return "Error: Wrong format of cron";
+            cron = cronSource;
+            cronExpression = expression;
+        }
+        else
+        {
+            cron = HumanToCronConverter.SafeConvertToCron(cronSource);
+            if (cron == null || !CronExpression.TryParse(cron, out var expression2))
+            {
+                return "Error: Wrong cron format";
+            }
+
+            cronExpression = expression2;
         }
 
-        var nextUtc = expression.GetNextOccurrence(DateTime.UtcNow);
+        var nextUtc = cronExpression.GetNextOccurrence(DateTime.UtcNow);
 
         if (nextUtc == null)
         {
             return "Error:Cant get next occurrence of cron";
+        }
+
+        var splits = cron.Split([" "], StringSplitOptions.RemoveEmptyEntries);
+        if (splits.FirstOrDefault()?.Contains("*") ?? false)
+        {
+            return $"Too often cron {cron}";
         }
 
         var descriptor = ExpressionDescriptor.GetDescription(cron, new Options
@@ -152,7 +170,8 @@ public class PlannyBotDaemon(
             FromUserName = message.From?.Username ?? "Unknown",
             Timestamp = DateTime.UtcNow.Ticks,
             Cron = cron,
-            CronDescription = descriptor
+            CronDescription = descriptor,
+            CronSource = cronSource,
         };
 
         planService.CreateOrUpdateByNameAndChat(plan);

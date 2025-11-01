@@ -15,3 +15,4 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_plans_chat_id_name ON plans (chat_id,
 CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_plans_timestamp ON plans (timestamp);
 ALTER TABLE plans ADD COLUMN int_id SERIAL;
 CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_plans_int_id ON plans (int_id);
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS cron_source varchar NOT NULL DEFAULT('');

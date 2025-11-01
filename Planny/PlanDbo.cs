@@ -39,4 +39,7 @@ public class PlanDbo
     
     [Column("cron_description", TypeName = "varchar"), Required]
     public required string CronDescription { get; set; }
+    
+    [Column("cron_source", TypeName = "varchar"), ConcurrencyCheck, Required]
+    public required string CronSource { get; set; }
 }
