@@ -21,4 +21,4 @@ CREATE TABLE IF NOT EXISTS chat_settings(
     chat_id bigint PRIMARY KEY NOT NULL,
     timestamp bigint NULL,
     settings varchar NOT NULL
-)
+);
