@@ -18,8 +18,13 @@ public static class CronExtensions
         return nextUtc;
     }
 
-    public static string GetCronDescription(string cron, string locale = "en")
+    public static string GetCronDescription(string cron, string locale = "en", TimeSpan? offset = null)
     {
+        if (offset != null)
+        {
+            cron = TryApplyOffset(cron, offset.Value, out _);
+        }
+        
         var descriptor = ExpressionDescriptor.GetDescription(cron, new Options
         {
             //DayOfWeekStartIndexZero = false,

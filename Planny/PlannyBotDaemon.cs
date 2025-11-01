@@ -161,7 +161,7 @@ public class PlannyBotDaemon(
         var chatPlans = await planService.SelectByChatId(message.Chat.Id);
         return chatPlans
             .Select(x =>
-                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en")} next run {CronExtensions.NextRun(x.Cron, chatSettings?.Settings.Offset)}")
+                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en", -chatSettings?.Settings.Offset)} next run {CronExtensions.NextRun(x.Cron, chatSettings?.Settings.Offset)}")
             .JoinToString(Environment.NewLine + Environment.NewLine);
     }
 
