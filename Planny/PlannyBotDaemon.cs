@@ -132,7 +132,7 @@ public class PlannyBotDaemon(
                 Offset = TimeSpan.FromHours(offset)
             }
         };
-        
+
         await chatSettingsService.CreateOrUpdate(newChat);
         return $"Created chat settings with {locale} and {offset}";
     }
@@ -161,8 +161,8 @@ public class PlannyBotDaemon(
         var chatPlans = await planService.SelectByChatId(message.Chat.Id);
         return chatPlans
             .Select(x =>
-                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en")} next run {CronExtensions.NextRun(x.Cron)}")
-            .JoinToString(Environment.NewLine);
+                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en")} next run {CronExtensions.NextRun(x.Cron, chatSettings?.Settings.Offset)}")
+            .JoinToString(Environment.NewLine + Environment.NewLine);
     }
 
     private async Task<string> CreateNewPlan(string messageText, Message message)
@@ -199,7 +199,7 @@ public class PlannyBotDaemon(
 
             cronExpression = expression2;
         }
-        
+
         var chatSettings = await chatSettingsService.Get(message.Chat.Id);
 
         var offset = chatSettings?.Settings.Offset ?? TimeSpan.Zero;
@@ -213,7 +213,7 @@ public class PlannyBotDaemon(
             log.Info($"Apply {offset:g} offset to cron {cron} -> {newCron}");
             cron = newCron;
         }
-        
+
         var newCronExpression = CronExpression.TryParse(newCron, out var exp) ? exp : cronExpression;
         var nextOccurrence = newCronExpression.GetNextOccurrence(DateTime.UtcNow) + offset;
 
