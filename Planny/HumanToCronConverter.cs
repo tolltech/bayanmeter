@@ -18,8 +18,8 @@ public static class HumanToCronConverter
     private static readonly Dictionary<string, string> DayOfWeekMap =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            { "понедельник", "1" }, { "вторник", "2" }, { "среда", "3" }, { "четверг", "4" },
-            { "пятница", "5" }, { "суббота", "6" }, { "воскресенье", "0" },
+            { "понедельник", "1" }, { "вторник", "2" }, { "среда", "3" }, { "среду", "3" }, { "четверг", "4" },
+            { "пятница", "5" }, { "пятницу", "5" }, { "суббота", "6" }, { "субботу", "6" }, { "воскресенье", "0" },
             { "monday", "1" }, { "tuesday", "2" }, { "wednesday", "3" }, { "thursday", "4" },
             { "friday", "5" }, { "saturday", "6" }, { "sunday", "0" }
         };
@@ -93,7 +93,7 @@ public static class HumanToCronConverter
 
         // Паттерн: "каждый понедельник в 9:00"
         var match = Regex.Match(expression,
-            @"(каждый|every)\s+(\w+)\s+(в|at)?\s*(\d{1,2}):(\d{2})",
+            @"(каждый|every|каждую|каждое)\s+(\w+)\s+(в|at)?\s*(\d{1,2}):(\d{2})",
             RegexOptions.IgnoreCase);
 
         if (match.Success)
