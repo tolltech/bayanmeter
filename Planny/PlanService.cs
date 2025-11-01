@@ -41,12 +41,31 @@ public class PlanService(IDataContextFactory dbContextFactory) : IPlanService
     public async Task<PlanDbo?> DeleteByIdOrChatAndName(int intId, long chatId, string name)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        var existent = await context.Plans.FirstOrDefaultAsync(x => (x.IntId == intId || x.Name == name) && x.ChatId == chatId);
+        var existent =
+            await context.Plans.FirstOrDefaultAsync(x => (x.IntId == intId || x.Name == name) && x.ChatId == chatId);
         if (existent == null)
         {
             return null;
         }
+
+        context.Plans.Remove(existent);
+        await context.SaveChangesAsync();
+        return existent;
+    }
+
+    public async Task<PlanDbo?> DeleteLastByChat(long chatId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var existent = await context.Plans
+            .Where(x => x.ChatId == chatId)
+            .OrderByDescending(x => x.Timestamp)
+            .FirstOrDefaultAsync();
         
+        if (existent == null)
+        {
+            return null;
+        }
+
         context.Plans.Remove(existent);
         await context.SaveChangesAsync();
         return existent;

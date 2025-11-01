@@ -15,6 +15,7 @@ public class PlannyBotDaemon(
     [FromKeyedServices(PlannyBotDaemon.Key)]
     TelegramBotClient telegramBotClient,
     IPlanService planService,
+    PlannyJobRunner  plannyJobRunner,
     ILog log) : IBotDaemon
 {
     public const string Key = "Planny";
@@ -32,7 +33,7 @@ public class PlannyBotDaemon(
             {
                 return;
             }
-
+            
             log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
             var messageText = message.Text ?? string.Empty;
@@ -46,14 +47,21 @@ public class PlannyBotDaemon(
             if (messageText.StartsWith("/new"))
             {
                 replyMessageText = CreateNewPlan(messageText, message);
+                //await plannyJobRunner.Run();
             }
             else if (messageText.StartsWith("/all"))
             {
                 replyMessageText = await GetAllPlans(message);
             }
+            else if (messageText.StartsWith("/deletelast"))
+            {
+                replyMessageText = await DeleteLastPlan(message);
+                //await plannyJobRunner.Run();
+            }
             else if (messageText.StartsWith("/delete"))
             {
                 replyMessageText = await DeletePlan(message, messageText);
+                //await plannyJobRunner.Run();
             }
 
             await client.SendTextMessageAsync(message.Chat.Id, replyMessageText,
@@ -68,6 +76,12 @@ public class PlannyBotDaemon(
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
+    }
+
+    private async Task<string> DeleteLastPlan(Message message)
+    {
+        var plan = await planService.DeleteLastByChat(message.Chat.Id);
+        return $"Removed last plan {plan?.IntId} {plan?.Name}";
     }
 
     private async Task<string> DeletePlan(Message message, string messageText)

@@ -19,7 +19,7 @@ public class PlanUpdater(ILog log, PlannyJobRunner plannyJobRunner) : Background
 
                 log.Info($"Run {newPlans} new plans");
                 
-                await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -28,7 +28,7 @@ public class PlanUpdater(ILog log, PlannyJobRunner plannyJobRunner) : Background
             catch (Exception ex)
             {
                 log.Error(ex, "Error in PlanUpdater service");
-                await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
             }
         }
 
