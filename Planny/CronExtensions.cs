@@ -18,12 +18,13 @@ public static class CronExtensions
         return nextUtc;
     }
 
-    public static string GetCronDescription(string cron)
+    public static string GetCronDescription(string cron, string locale = "en")
     {
         var descriptor = ExpressionDescriptor.GetDescription(cron, new Options
         {
             //DayOfWeekStartIndexZero = false,
-            Use24HourTimeFormat = true
+            Use24HourTimeFormat = true,
+            Locale = locale
         });
 
         return descriptor;

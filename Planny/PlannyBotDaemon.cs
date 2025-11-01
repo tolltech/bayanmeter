@@ -157,10 +157,11 @@ public class PlannyBotDaemon(
 
     private async Task<string> GetAllPlans(Message message)
     {
+        var chatSettings = await chatSettingsService.Get(message.Chat.Id);
         var chatPlans = await planService.SelectByChatId(message.Chat.Id);
         return chatPlans
             .Select(x =>
-                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron)} next run {CronExtensions.NextRun(x.Cron)}")
+                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en")} next run {CronExtensions.NextRun(x.Cron)}")
             .JoinToString(Environment.NewLine);
     }
 
@@ -227,7 +228,7 @@ public class PlannyBotDaemon(
             return $"Too often cron {newCron}";
         }
 
-        var descriptor = CronExtensions.GetCronDescription(cron);
+        var descriptor = CronExtensions.GetCronDescription(cron, chatSettings?.Settings.Locale ?? "en");
 
         var plan = new PlanDbo
         {
