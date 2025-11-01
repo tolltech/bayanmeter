@@ -19,8 +19,10 @@ public class Tests
     [TestCase("каждый понедельник в 9:00", "00 9 * * 1")]
     [TestCase("каждую субботу в 9:00", "00 9 * * 6")]
     [TestCase("каждое воскресенье в 11:30", "30 11 * * 0")]
+    [TestCase("каждое воскресенье в 9:00", "00 9 * * 0")]
     [TestCase("каждый вторник", null)]
     [TestCase("1-го числа каждого месяца в 6:00", "00 6 1 * *")]
+    //[TestCase("1 и 15 числа в 6:00", "00 6 1 * *")]
     [TestCase("каждые 5 минут", "*/5 * * * *")]
     public void TestHumanConvert(string human, string? expected)
     {
@@ -72,5 +74,19 @@ public class Tests
                     .WithCronSchedule(actual).Build();
             });
         }
+    }
+
+    [TestCase("35 9 * * 5", "At 09:35, only on Friday")]
+    public void TestDescription(string cron, string? expected)
+    {
+        var actual = CronExtensions.GetCronDescription(cron);
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [TestCase("35 9 * * *", 13)]
+    public void TestDescriptionTimeZone(string cron, int hour)
+    {
+        var actual = CronExtensions.NextRun(cron, TimeSpan.FromHours(4));
+        Assert.That(actual?.Hour, Is.EqualTo(hour));
     }
 }

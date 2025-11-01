@@ -1,5 +1,4 @@
-﻿using CronExpressionDescriptor;
-using Cronos;
+﻿using Cronos;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -16,6 +15,7 @@ public class PlannyBotDaemon(
     TelegramBotClient telegramBotClient,
     IPlanService planService,
     PlannyJobRunner plannyJobRunner,
+    IChatSettingsService chatSettingsService,
     ILog log) : IBotDaemon
 {
     public const string Key = "Planny";
@@ -46,7 +46,7 @@ public class PlannyBotDaemon(
             var replyMessageText = string.Empty;
             if (messageText.StartsWith("/new"))
             {
-                replyMessageText = CreateNewPlan(messageText, message);
+                replyMessageText = await CreateNewPlan(messageText, message);
                 //await plannyJobRunner.Run();
             }
             else if (messageText.StartsWith("/all"))
@@ -63,6 +63,10 @@ public class PlannyBotDaemon(
                 replyMessageText = await DeletePlan(message, messageText);
                 //await plannyJobRunner.Run();
             }
+            else if (messageText.StartsWith("/chat"))
+            {
+                replyMessageText = await CreateChatSettings(message, messageText);
+            }
 
             await client.SendTextMessageAsync(message.Chat.Id, replyMessageText,
                 cancellationToken: cancellationToken,
@@ -76,6 +80,61 @@ public class PlannyBotDaemon(
                 await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
+    }
+
+    private static readonly HashSet<string> locales =
+    [
+        "en",
+        "zh-Hans",
+        "zh-Hant",
+        "cz",
+        "da",
+        "nl",
+        "fi",
+        "fr",
+        "de",
+        "he",
+        "hu",
+        "it",
+        "ja",
+        "ko",
+        "nb",
+        "fa",
+        "pl",
+        "pt-BR",
+        "ro",
+        "ru",
+        "sl-SI",
+        "es",
+        "es-MX",
+        "sv",
+        "vi",
+        "tr",
+        "uk",
+        "el",
+        "kk"
+    ];
+
+    private async Task<string> CreateChatSettings(Message message, string messageText)
+    {
+        var chatId = message.Chat.Id;
+        var args = messageText.Replace("/chat", string.Empty).Trim();
+        var splits = args.Split([" "], StringSplitOptions.RemoveEmptyEntries);
+        var offset = int.Parse(splits.FirstOrDefault(x => int.TryParse(x, out _)) ?? "0");
+        var locale = splits.FirstOrDefault(x => locales.Contains(x));
+        var newChat = new ChatSettingsDbo
+        {
+            ChatId = chatId,
+            Timestamp = DateTime.UtcNow.Ticks,
+            Settings = new ChatSettings
+            {
+                Locale = locale ?? string.Empty,
+                Offset = TimeSpan.FromHours(offset)
+            }
+        };
+        
+        await chatSettingsService.CreateOrUpdate(newChat);
+        return $"Created chat settings with {locale} and {offset}";
     }
 
     private async Task<string> DeleteLastPlan(Message message)
@@ -105,7 +164,7 @@ public class PlannyBotDaemon(
             .JoinToString(Environment.NewLine);
     }
 
-    private string CreateNewPlan(string messageText, Message message)
+    private async Task<string> CreateNewPlan(string messageText, Message message)
     {
         var rawName = new string(messageText.SkipWhile(x => x != ' ').TakeWhile(x => x != ',').ToArray());
         if (string.IsNullOrWhiteSpace(rawName))
@@ -139,25 +198,36 @@ public class PlannyBotDaemon(
 
             cronExpression = expression2;
         }
+        
+        var chatSettings = await chatSettingsService.Get(message.Chat.Id);
 
-        var nextUtc = cronExpression.GetNextOccurrence(DateTime.UtcNow);
+        var offset = chatSettings?.Settings.Offset ?? TimeSpan.Zero;
+        var newCron = CronExtensions.TryApplyOffset(cron, offset, out var error);
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            log.Error(error);
+        }
+        else
+        {
+            log.Info($"Apply {offset:g} offset to cron {cron} -> {newCron}");
+            cron = newCron;
+        }
+        
+        var newCronExpression = CronExpression.TryParse(newCron, out var exp) ? exp : cronExpression;
+        var nextOccurrence = newCronExpression.GetNextOccurrence(DateTime.UtcNow) + offset;
 
-        if (nextUtc == null)
+        if (nextOccurrence == null)
         {
             return "Error:Cant get next occurrence of cron";
         }
 
-        var splits = cron.Split([" "], StringSplitOptions.RemoveEmptyEntries);
+        var splits = newCron.Split([" "], StringSplitOptions.RemoveEmptyEntries);
         if (splits.FirstOrDefault()?.Contains("*") ?? false)
         {
-            return $"Too often cron {cron}";
+            return $"Too often cron {newCron}";
         }
 
-        var descriptor = ExpressionDescriptor.GetDescription(cron, new Options
-        {
-            DayOfWeekStartIndexZero = false,
-            Use24HourTimeFormat = true
-        });
+        var descriptor = CronExtensions.GetCronDescription(cron);
 
         var plan = new PlanDbo
         {
@@ -169,15 +239,16 @@ public class PlannyBotDaemon(
             CreateDate = DateTimeOffset.UtcNow,
             FromUserName = message.From?.Username ?? "Unknown",
             Timestamp = DateTime.UtcNow.Ticks,
-            Cron = cron,
+            Cron = newCron,
             CronDescription = descriptor,
             CronSource = cronSource,
         };
 
-        planService.CreateOrUpdateByNameAndChat(plan);
+        await planService.CreateOrUpdateByNameAndChat(plan);
 
-        return $"Create {rawName.Trim()} with {descriptor}. Next run is {nextUtc.Value:s}";
+        return $"Create {rawName.Trim()} with {descriptor}. Next run is {nextOccurrence.Value:s}";
     }
+
 
     public Task HandleErrorAsync(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken)
     {
