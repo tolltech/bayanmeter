@@ -21,16 +21,18 @@ public class PlanJobFactory(TelegramBotClient telegramBotClient, ILog log) : IJo
 
 public class PlanJob(TelegramBotClient telegramBotClient, ILog log) : IJob
 {
+    internal const string MsgTextName = "MsgText";
+    
     public async Task Execute(IJobExecutionContext context)
     {
         try
         {
             var jobData = context.JobDetail.JobDataMap;
 
-            var planName = jobData.GetString(nameof(PlanDbo.Name));
+            var msgText = jobData.GetString(MsgTextName);
             var chatId = jobData.GetLongValue(nameof(PlanDbo.ChatId));
 
-            await telegramBotClient.SendTextMessageAsync(chatId, $"It's time to {planName}");
+            await telegramBotClient.SendTextMessageAsync(chatId, msgText ?? "Unknown");
         }
         catch (Exception e)
         {
@@ -39,7 +41,7 @@ public class PlanJob(TelegramBotClient telegramBotClient, ILog log) : IJob
     }
 }
 
-public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFactory, ILog log)
+public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFactory, IChatSettingsService chatSettingsService, ILog log)
 {
     private static readonly ConcurrentDictionary<Guid, PlanDbo> runPlanIds = new();
     private static IScheduler? scheduler;
@@ -91,11 +93,17 @@ public class PlannyJobRunner(IPlanService planService, PlanJobFactory planJobFac
                     }
 
                     log.Info($"Scheduling {plan.Name} {plan.Id}");
+                    
+                    var chatSettings = await chatSettingsService.Get(plan.ChatId);
 
+                    var message = chatSettings?.Settings.Locale.ToLower() == "ru"
+                        ? $"Самое время {plan.Name}"
+                        : $"It's time to {plan.Name}";
+                    
                     var job = JobBuilder.Create<PlanJob>()
                         .WithIdentity(plan.Id.ToString())
                         .UsingJobData(nameof(plan.ChatId), plan.ChatId)
-                        .UsingJobData(nameof(plan.Name), plan.Name)
+                        .UsingJobData(PlanJob.MsgTextName, message)
                         .Build();
 
                     if (!CronConverter.TryConvertUnixToQuartz(plan.Cron, out var quartzCron))

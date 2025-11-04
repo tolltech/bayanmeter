@@ -161,7 +161,9 @@ public class PlannyBotDaemon(
         var chatPlans = await planService.SelectByChatId(message.Chat.Id);
         return chatPlans
             .Select(x =>
-                $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en", -chatSettings?.Settings.Offset)} next run {CronExtensions.NextRun(x.Cron, chatSettings?.Settings.Offset)}")
+                chatSettings?.Settings.Locale.ToLower() == "ru"
+                ? $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings.Settings.Locale, -chatSettings?.Settings.Offset)}. Следующий запуск {CronExtensions.NextRun(x.Cron, chatSettings?.Settings.Offset)}"
+                : $"{x.IntId} {x.Name} {CronExtensions.GetCronDescription(x.Cron, chatSettings?.Settings.Locale ?? "en", -chatSettings?.Settings.Offset)}. next run {CronExtensions.NextRun(x.Cron, chatSettings?.Settings.Offset)}")
             .JoinToString(Environment.NewLine + Environment.NewLine);
     }
 
@@ -247,7 +249,9 @@ public class PlannyBotDaemon(
 
         await planService.CreateOrUpdateByNameAndChat(plan);
 
-        return $"Create {rawName.Trim()} with {descriptor}. Next run is {nextOccurrence.Value:s}";
+        return chatSettings?.Settings.Locale.ToLower() == "ru" 
+            ? $"Запланированно {rawName.Trim()} {descriptor}. Следующий запуск {nextOccurrence.Value:s}"
+            : $"Create {rawName.Trim()} with {descriptor}. Next run is {nextOccurrence.Value:s}";
     }
 
 
