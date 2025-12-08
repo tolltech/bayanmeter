@@ -73,9 +73,9 @@ public static class CronExtensions
         }
 
         var oldNextOccurence = CronExtensions.NextRun(cron);
-        if (newNextOccurence.Value.ToString("t") != oldNextOccurence?.ToString("t"))
+        if (newNextOccurence.Value.Hour != oldNextOccurence?.Hour)
         {
-            errorLog = $"Wrong nextOccurrences {oldNextOccurence:s} {newNextOccurence:s} {cron} {offset:g} -> {newCron}";
+            errorLog = $"Wrong nextOccurrences {oldNextOccurence:s} vs {newNextOccurence:s}. '{cron}' with '{offset:g}' -> '{newCron}'";
             return cron;
         }
         
