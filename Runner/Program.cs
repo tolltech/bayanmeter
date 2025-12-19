@@ -47,7 +47,13 @@ var ignoreTypes = new HashSet<Type>
     typeof(IConnectionString),
     typeof(IBotDaemon)
 };
-IoCResolver.Resolve((@interface, implementation) => services.AddSingleton(@interface, implementation), ignoreTypes, "Tolltech");
+var bindings = IoCResolver.Resolve((@interface, implementation) => services.AddSingleton(@interface, implementation),
+    ignoreTypes, "Tolltech");
+
+foreach (var binding in bindings.OrderBy(x => x.Source.Namespace).ThenBy(x => x.Source.Name).ThenBy(x => x.Target.Name))
+{
+    log.Info($" -> Bind {binding.Source.Name} to {binding.Target.Name}");
+}
 
 log.Info($"Start Bots {DateTime.Now}");
 
@@ -80,7 +86,7 @@ using var cts = new CancellationTokenSource();
 foreach (var botSetting in botSettings)
 {
     var token = botSetting.Token;
- 
+
     log.Info($"Configure bot {token}");
 
     var client = new TelegramBotClient(token);
@@ -107,34 +113,41 @@ log.Info("Built app");
 
 foreach (var botSetting in botSettings)
 {
-    var client = host.Services.GetKeyedService<TelegramBotClient>(botSetting.BotName);
-    var botDaemon = host.Services.GetKeyedService<IBotDaemon>(botSetting.BotName);
-    if (botDaemon == null)
+    try
     {
-        log.Error($"Error getting @{botSetting.BotName}");    
-        continue;
+        var client = host.Services.GetKeyedService<TelegramBotClient>(botSetting.BotName);
+        var botDaemon = host.Services.GetKeyedService<IBotDaemon>(botSetting.BotName);
+        if (botDaemon == null)
+        {
+            log.Error($"Error getting @{botSetting.BotName}");
+            continue;
+        }
+
+        if (client == null)
+        {
+            log.Error($"Error getting client @{botSetting.BotName}");
+            continue;
+        }
+
+        var receiverOptions = new ReceiverOptions
+        {
+            AllowedUpdates = { } // receive all update types
+        };
+
+        client.StartReceiving(
+            botDaemon.HandleUpdateAsync,
+            botDaemon.HandleErrorAsync,
+            receiverOptions,
+            cancellationToken: cts.Token);
+
+        var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
+
+        log.Info($"Start listening for @{me.Username}");
     }
-
-    if (client == null)
+    catch (Exception e)
     {
-        log.Error($"Error getting client @{botSetting.BotName}");    
-        continue;
+        log.Fatal(e, $"Unable to start bot {botSetting.BotName}");
     }
-    
-    var receiverOptions = new ReceiverOptions
-    {
-        AllowedUpdates = { } // receive all update types
-    };
-    
-    client.StartReceiving(
-        botDaemon.HandleUpdateAsync,
-        botDaemon.HandleErrorAsync,
-        receiverOptions,
-        cancellationToken: cts.Token);
-
-    var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
-
-    log.Info($"Start listening for @{me.Username}");
 }
 
 log.Info($"Running host");

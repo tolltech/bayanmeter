@@ -9,9 +9,10 @@ namespace Tolltech.CoreLib
     {
         private static readonly HashSet<Type> emptyTypeHashset =  new HashSet<Type>();
 
-        public static void Resolve(Action<Type, Type> resolve, HashSet<Type> ignoreTypes = null, params string[] assemblyNames)
+        public static (Type Source, Type Target)[] Resolve(Action<Type, Type> resolve, HashSet<Type> ignoreTypes = null, params string[] assemblyNames)
         {
-
+            var result = new List<(Type, Type)>();
+            
             ignoreTypes = ignoreTypes ?? emptyTypeHashset;
 
             var assemblyNameHashSet = new HashSet<string>(assemblyNames);
@@ -48,9 +49,12 @@ namespace Tolltech.CoreLib
 
                 foreach (var realization in realizations)
                 {
+                    result.Add((@interface, realization));
                     resolve(@interface, realization);
                 }
             }
+
+            return result.ToArray();
         }
     }
 }
