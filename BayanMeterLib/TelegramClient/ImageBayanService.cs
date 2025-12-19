@@ -9,12 +9,10 @@ namespace Tolltech.BayanMeterLib.TelegramClient
     public class ImageBayanService : IImageBayanService
     {
         private readonly IQueryExecutorFactory queryExecutorFactory;
-        private readonly IImageHasher imageHasher;
 
-        public ImageBayanService(IQueryExecutorFactory queryExecutorFactory, IImageHasher imageHasher)
+        public ImageBayanService(IQueryExecutorFactory queryExecutorFactory)
         {
             this.queryExecutorFactory = queryExecutorFactory;
-            this.imageHasher = imageHasher;
         }
 
         public void SaveMessage(params MessageDto[] messages)
@@ -56,55 +54,10 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             result.IntId = from.IntId;
             result.MessageDate = from.MessageDate;
             result.Timestamp = from.Timestamp;
-            result.Hash = to?.Hash ?? imageHasher.GetHash(from.ImageBytes);
+            result.Hash = string.Empty;
             result.BayanCount = to?.BayanCount ?? 0;
 
             return result;
-        }
-
-        public BayanResultDto GetBayanMetric(string messageStrId)
-        {
-            using var queryExecutor = queryExecutorFactory.Create<MessageHandler, MessageDbo>();
-
-            var message = queryExecutor.Execute(x => x.Find(messageStrId));
-
-            if (message == null)
-            {
-                return new BayanResultDto
-                {
-                    AlreadyWasCount = 0
-                };
-            }
-
-            var toDate = message.MessageDate;
-            var fromDate = toDate.AddMonths(-6);
-            var previousMessages = queryExecutor.Execute(x => x.Select(message.ChatId, fromDate.DateTime, toDate.DateTime))
-                .Where(x => x.StrId != messageStrId)
-                .OrderByDescending(x => x.MessageDate.DateTime)
-                .ToArray();
-
-            foreach (var previousMessage in previousMessages)
-            {
-                if (previousMessage.Hash.HashEquals(message.Hash))
-                {
-                    message.BayanCount = previousMessage.BayanCount + 1;
-                    message.PreviousMessageId = previousMessage.IntId;
-
-                    queryExecutor.Execute(x => x.Update());
-
-                    return new BayanResultDto
-                    {
-                        AlreadyWasCount = message.BayanCount,
-                        PreviousMessageId = previousMessage.IntId,
-                        PreviousChatId = previousMessage.ChatId
-                    };
-                }
-            }
-
-            return new BayanResultDto
-            {
-                AlreadyWasCount = 0
-            };
         }
     }
 }

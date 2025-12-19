@@ -3,11 +3,18 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
+using Tolltech.AlertBot;
+using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.CoreLib;
+using Tolltech.Counter;
+using Tolltech.KCalMeter;
+using Tolltech.KonturPaymentsLib;
+using Tolltech.LevDimover;
 using Tolltech.Planny;
 using Tolltech.PostgreEF.Integration;
 using Tolltech.Runner;
 using Tolltech.Runner.Psql;
+using Tolltech.Storer;
 using Tolltech.TelegramCore;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Console;
@@ -60,6 +67,13 @@ var botSettings = appSettings.BotSettings;
 log.Info($"Read {botSettings.Length} bot settings");
 
 services.AddKeyedSingleton<IBotDaemon, PlannyBotDaemon>(PlannyBotDaemon.Key);
+services.AddKeyedSingleton<IBotDaemon, EasyMemeBotDaemon>("EasyMeme");
+services.AddKeyedSingleton<IBotDaemon, KonturPaymentsBotDaemon>("KonturPayments");
+services.AddKeyedSingleton<IBotDaemon, ServerStorerBotDaemon>("ServerStorer");
+services.AddKeyedSingleton<IBotDaemon, KCalMeterBotDaemon>("KCalMeter");
+services.AddKeyedSingleton<IBotDaemon, LevDimovBotDaemon>("LevDimover");
+services.AddKeyedSingleton<IBotDaemon, AlertBotDaemon>("AlertBot");
+services.AddKeyedSingleton<IBotDaemon, CounterBotDaemon>("CounterBot");
 
 using var cts = new CancellationTokenSource();
 

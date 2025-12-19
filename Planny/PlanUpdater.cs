@@ -13,16 +13,17 @@ public class PlanUpdater(ILog log, PlannyJobRunner plannyJobRunner) : Background
         {
             try
             {
-                log.Info("PlanUpdater task running");
+                //log.Info("PlanUpdater task running");
 
                 var newPlans = await plannyJobRunner.Run();
 
-                log.Info($"Run {newPlans} new plans");
+                //log.Info($"Run {newPlans} new plans");
                 
                 await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
+                log.Error(ex, "Stop PlanUpdater service");
                 break;
             }
             catch (Exception ex)
