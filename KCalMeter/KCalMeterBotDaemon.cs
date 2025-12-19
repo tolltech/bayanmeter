@@ -5,27 +5,13 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Tolltech.CoreLib.Helpers;
-using Tolltech.SqlEF;
 using Tolltech.TelegramCore;
 
 namespace Tolltech.KCalMeter;
 
-public class KCalMeterBotDaemon : IBotDaemon
+public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 {
-    private readonly IQueryExecutorFactory queryExecutorFactory;
-    private readonly TelegramBotClient telegramBotClient;
-    private readonly ITelegramClient telegramClient;
-    private readonly IKCalMeterService kCalMeterService;
     private static readonly ILog log = LogManager.GetLogger(typeof(KCalMeterBotDaemon));
-
-    public KCalMeterBotDaemon(IQueryExecutorFactory queryExecutorFactory, TelegramBotClient telegramBotClient,
-        ITelegramClient telegramClient, IKCalMeterService kCalMeterService)
-    {
-        this.queryExecutorFactory = queryExecutorFactory;
-        this.telegramBotClient = telegramBotClient;
-        this.telegramClient = telegramClient;
-        this.kCalMeterService = kCalMeterService;
-    }
 
     public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
     {

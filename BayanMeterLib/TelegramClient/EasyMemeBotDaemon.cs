@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
@@ -13,20 +14,24 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public class EasyMemeBotDaemon : IBotDaemon
     {
+        public const string Key = "EasyMeme";
+
         private readonly ITelegramClient telegramClient;
         private readonly IImageBayanService imageBayanService;
         private readonly IMemEasyService memEasyService;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(EasyMemeBotDaemon));
 
-        public EasyMemeBotDaemon(ITelegramClient telegramClient, IImageBayanService imageBayanService, IMemEasyService memEasyService)
+        public EasyMemeBotDaemon([FromKeyedServices(Key)] ITelegramClient telegramClient,
+            IImageBayanService imageBayanService, IMemEasyService memEasyService)
         {
             this.telegramClient = telegramClient;
             this.imageBayanService = imageBayanService;
             this.memEasyService = memEasyService;
         }
 
-        public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient client, Update update,
+            CancellationToken cancellationToken)
         {
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (update.Type != UpdateType.Message)
@@ -56,7 +61,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             }
         }
 
-        public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception,
+            CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
             {

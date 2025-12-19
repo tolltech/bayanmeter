@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
@@ -17,13 +18,16 @@ namespace Tolltech.Storer
 {
     public class ServerStorerBotDaemon : IBotDaemon
     {
+        public const string Key = "ServerStorer";
+
         private readonly ITelegramClient telegramClient;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(ServerStorerBotDaemon));
         private readonly StorerCustomSettings storerCustomSettings;
         private readonly Dictionary<string, string> storerCustomSettingsRaw;
 
-        public ServerStorerBotDaemon(ITelegramClient telegramClient, CustomSettings customSettings)
+        public ServerStorerBotDaemon([FromKeyedServices(Key)] ITelegramClient telegramClient,
+            [FromKeyedServices(Key)] CustomSettings customSettings)
         {
             this.telegramClient = telegramClient;
             storerCustomSettingsRaw = customSettings.Raw.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
@@ -60,7 +64,8 @@ namespace Tolltech.Storer
                 }
                 catch (Exception e)
                 {
-                    await client.SendTextMessageAsync(message.Chat.Id, $"Error. {e.Message} {e.StackTrace}").ConfigureAwait(false);
+                    await client.SendTextMessageAsync(message.Chat.Id, $"Error. {e.Message} {e.StackTrace}")
+                        .ConfigureAwait(false);
                     throw;
                 }
             }

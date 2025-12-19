@@ -58,9 +58,9 @@ namespace Tolltech.BayanMeter
             Console.WriteLine($"Read {botSettings.Length} bot settings");
 
             kernel.Unbind<IBotDaemon>();
-            kernel.Bind<IBotDaemon>().To<EasyMemeBotDaemon>().Named("EasyMeme");
-            kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named("KonturPayments");
-            kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named("ServerStorer");
+            kernel.Bind<IBotDaemon>().To<EasyMemeBotDaemon>().Named(EasyMemeBotDaemon.Key);
+            kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named(KonturPaymentsBotDaemon.Key);
+            kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named(ServerStorerBotDaemon.Key);
             kernel.Bind<IBotDaemon>().To<KCalMeterBotDaemon>().Named("KCalMeter");
             kernel.Bind<IBotDaemon>().To<LevDimovBotDaemon>().Named("LevDimover");
             kernel.Bind<IBotDaemon>().To<AlertBotDaemon>().Named("AlertBot");

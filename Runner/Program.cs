@@ -67,8 +67,8 @@ var botSettings = appSettings.BotSettings;
 log.Info($"Read {botSettings.Length} bot settings");
 
 services.AddKeyedSingleton<IBotDaemon, PlannyBotDaemon>(PlannyBotDaemon.Key);
-services.AddKeyedSingleton<IBotDaemon, EasyMemeBotDaemon>("EasyMeme");
-services.AddKeyedSingleton<IBotDaemon, KonturPaymentsBotDaemon>("KonturPayments");
+services.AddKeyedSingleton<IBotDaemon, EasyMemeBotDaemon>(EasyMemeBotDaemon.Key);
+services.AddKeyedSingleton<IBotDaemon, KonturPaymentsBotDaemon>(KonturPaymentsBotDaemon.Key);
 services.AddKeyedSingleton<IBotDaemon, ServerStorerBotDaemon>("ServerStorer");
 services.AddKeyedSingleton<IBotDaemon, KCalMeterBotDaemon>("KCalMeter");
 services.AddKeyedSingleton<IBotDaemon, LevDimovBotDaemon>("LevDimover");
@@ -91,6 +91,7 @@ foreach (var botSetting in botSettings)
         services.AddSingleton<PlannyJobRunner>();
     }
 
+    services.AddKeyedSingleton<ITelegramClient>(botSetting.BotName, new TelegramClient(client));
     services.AddKeyedSingleton(botSetting.BotName, client);
     services.AddKeyedSingleton(botSetting.BotName, new CustomSettings
     {

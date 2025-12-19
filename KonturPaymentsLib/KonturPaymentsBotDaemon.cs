@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using log4net;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Telegram.Bot;
@@ -21,6 +22,8 @@ namespace Tolltech.KonturPaymentsLib
 {
     public class KonturPaymentsBotDaemon : IBotDaemon
     {
+        public const string Key = "KonturPayments";
+        
         private readonly IQueryExecutorFactory queryExecutorFactory;
         private readonly TelegramBotClient telegramBotClient;
         private readonly ITelegramClient telegramClient;
@@ -32,8 +35,8 @@ namespace Tolltech.KonturPaymentsLib
         private static readonly ConcurrentDictionary<DateTime, int> timerDates =
             new ConcurrentDictionary<DateTime, int>();
 
-        public KonturPaymentsBotDaemon(IQueryExecutorFactory queryExecutorFactory, TelegramBotClient telegramBotClient,
-            ITelegramClient telegramClient)
+        public KonturPaymentsBotDaemon(IQueryExecutorFactory queryExecutorFactory, [FromKeyedServices(Key)] TelegramBotClient telegramBotClient,
+            [FromKeyedServices(Key)] ITelegramClient telegramClient)
         {
             this.queryExecutorFactory = queryExecutorFactory;
             this.telegramBotClient = telegramBotClient;

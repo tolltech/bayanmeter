@@ -9,15 +9,7 @@ namespace Tolltech.LevDimover;
 
 public class LevDimovBotDaemon : IBotDaemon
 {
-    private readonly TelegramBotClient telegramBotClient;
-    private readonly ITelegramClient telegramClient;
     private static readonly ILog log = LogManager.GetLogger(typeof(LevDimovBotDaemon));
-
-    public LevDimovBotDaemon(TelegramBotClient telegramBotClient, ITelegramClient telegramClient)
-    {
-        this.telegramBotClient = telegramBotClient;
-        this.telegramClient = telegramClient;
-    }
 
     private static string GetLevPath()
     {

@@ -7,15 +7,9 @@ using Tolltech.TelegramCore;
 
 namespace Tolltech.Counter;
 
-public class CounterBotDaemon(
-    TelegramBotClient telegramBotClient,
-    ITelegramClient telegramClient,
-    ICounterService counterService)
+public class CounterBotDaemon(ICounterService counterService)
     : IBotDaemon
 {
-    private readonly TelegramBotClient telegramBotClient = telegramBotClient;
-    private readonly ITelegramClient telegramClient = telegramClient;
-    private readonly ICounterService counterService = counterService;
     private static readonly ILog log = LogManager.GetLogger(typeof(CounterBotDaemon));
 
     public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
