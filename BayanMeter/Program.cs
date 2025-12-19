@@ -4,18 +4,10 @@ using System.Threading;
 using Newtonsoft.Json;
 using Ninject;
 using Telegram.Bot;
-using Tolltech.BayanMeter.Psql;
 using Tolltech.Core;
-using Tolltech.PostgreEF.Integration;
 using Tolltech.TelegramCore;
 using Telegram.Bot.Extensions.Polling;
-using Tolltech.AlertBot;
-using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.CoreLib;
-using Tolltech.Counter;
-using Tolltech.KCalMeter;
-using Tolltech.KonturPaymentsLib;
-using Tolltech.LevDimover;
 using Tolltech.Storer;
 
 namespace Tolltech.BayanMeter
@@ -51,20 +43,12 @@ namespace Tolltech.BayanMeter
             var connectionString = appSettings?.ConnectionString;
 
             Console.WriteLine($"Read {connectionString} connectionString");
-
-            kernel.Rebind<IConnectionString>().ToConstant(new ConnectionString(connectionString));
-
-            var botSettings = appSettings?.BotSettings ?? Array.Empty<BotSettings>();
+            
+            var botSettings = appSettings?.BotSettings ?? [];
             Console.WriteLine($"Read {botSettings.Length} bot settings");
 
             kernel.Unbind<IBotDaemon>();
-            kernel.Bind<IBotDaemon>().To<EasyMemeBotDaemon>().Named(EasyMemeBotDaemon.Key);
-            kernel.Bind<IBotDaemon>().To<KonturPaymentsBotDaemon>().Named(KonturPaymentsBotDaemon.Key);
             kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named(ServerStorerBotDaemon.Key);
-            kernel.Bind<IBotDaemon>().To<KCalMeterBotDaemon>().Named("KCalMeter");
-            kernel.Bind<IBotDaemon>().To<LevDimovBotDaemon>().Named("LevDimover");
-            kernel.Bind<IBotDaemon>().To<AlertBotDaemon>().Named("AlertBot");
-            kernel.Bind<IBotDaemon>().To<CounterBotDaemon>().Named("CounterBot");
 
             using var cts = new CancellationTokenSource();
 

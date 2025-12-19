@@ -2,7 +2,7 @@
 
 namespace Tolltech.Planny;
 
-public class ChatSettingsService(IDataContextFactory dbContextFactory) : IChatSettingsService
+public class ChatSettingsService(IDbContextFactory<PlannyContext> dbContextFactory) : IChatSettingsService
 {
     public async Task<ChatSettingsDbo?> Get(long chatId)
     {

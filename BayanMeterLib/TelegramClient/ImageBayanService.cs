@@ -1,38 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Tolltech.BayanMeterLib.Psql;
-using Tolltech.SqlEF;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public class ImageBayanService : IImageBayanService
     {
-        private readonly IQueryExecutorFactory queryExecutorFactory;
+        private readonly MessageHandler messageHandler;
 
-        public ImageBayanService(IQueryExecutorFactory queryExecutorFactory)
+        public ImageBayanService(MessageHandler messageHandler)
         {
-            this.queryExecutorFactory = queryExecutorFactory;
+            this.messageHandler = messageHandler;
         }
 
-        public void SaveMessage(params MessageDto[] messages)
+        public void CreateMessage(MessageDto message)
         {
-            var msgByStrId = messages.GroupBy(x => x.StrId).Select(x => x.First()).ToDictionary(x => x.StrId);
-
-            using var queryExecutor = queryExecutorFactory.Create<MessageHandler, MessageDbo>();
-            var existents = queryExecutor.Execute(x => x.Select(msgByStrId.Keys.ToArray()));
-
-            foreach (var existent in existents)
-            {
-                Convert(msgByStrId[existent.StrId], existent);
-            }
-
-            var existentStrIds = new HashSet<string>(existents.Select(x => x.StrId));
-            var toCreate = msgByStrId.Values.Where(x => !existentStrIds.Contains(x.StrId)).Select(x => Convert(x))
-                .ToArray();
-
-            queryExecutor.Execute(x => x.Create(toCreate));
-            queryExecutor.Execute(x => x.Update());
+            var toCreate = Convert(message);
+            messageHandler.Create(toCreate);
         }
 
         private MessageDbo Convert([NotNull] MessageDto from, [CanBeNull] MessageDbo to = null)

@@ -1,21 +1,20 @@
-﻿using Tolltech.BayanMeterLib.Psql;
-using Tolltech.SqlEF;
+﻿using System.Collections.Generic;
+using Tolltech.BayanMeterLib.Psql;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public class MemEasyService : IMemEasyService
     {
-        private readonly IQueryExecutorFactory queryExecutorFactory;
+        private readonly MessageHandler messageHandler;
 
-        public MemEasyService(IQueryExecutorFactory queryExecutorFactory)
+        public MemEasyService(MessageHandler messageHandler)
         {
-            this.queryExecutorFactory = queryExecutorFactory;
+            this.messageHandler = messageHandler;
         }
 
         public MessageDbo GetRandomMessages(long chatId)
         {
-            using var queryExecutor = queryExecutorFactory.Create<MessageHandler, MessageDbo>();
-            return queryExecutor.Execute(f => f.GetRandom(chatId));
+            return messageHandler.GetRandom(chatId) ?? throw new KeyNotFoundException();
         }
     }
 }

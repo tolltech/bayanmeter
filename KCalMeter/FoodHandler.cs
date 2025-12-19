@@ -1,18 +1,15 @@
-﻿using Tolltech.SqlEF;
-using Tolltech.SqlEF.Integration;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Tolltech.KCalMeter;
 
-// ReSharper disable once ClassNeverInstantiated.Global
-public class FoodHandler : SqlHandlerBase<FoodDbo>
+public class FoodContext(DbContextOptions<FoodContext> options) : DbContext(options)
 {
-    private readonly DataContextBase<FoodDbo> dataContext;
+    public DbSet<FoodDbo> Table { get; set; }
+}
 
-    public FoodHandler(DataContextBase<FoodDbo> dataContext)
-    {
-        this.dataContext = dataContext;
-    }
-
+// ReSharper disable once ClassNeverInstantiated.Global
+public class FoodHandler(IDbContextFactory<FoodContext> dbContextFactory)
+{
     public FoodDbo ReadFood(string name, long chatId, long userId)
     {
         var key = FoodDbo.GetId(name, chatId, userId);
@@ -25,25 +22,25 @@ public class FoodHandler : SqlHandlerBase<FoodDbo>
         return result;
     }
 
-    public void Update()
-    {
-        dataContext.SaveChanges();
-    }
-
     public void Create(params FoodDbo[] items)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         dataContext.Table.AddRange(items);
+        dataContext.SaveChanges();
     }
 
     public void Delete(params FoodDbo[] items)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         var keys = items.Select(x => x.Id).Distinct().ToArray();
         var toDelete = dataContext.Table.Where(x => keys.Contains(x.Id));
         dataContext.Table.RemoveRange(toDelete);
+        dataContext.SaveChanges();
     }
 
     public FoodDbo? Find(string name, long chatId, long userId)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         var key = FoodDbo.GetId(name, chatId, userId);
         var result = dataContext.Table.FirstOrDefault(x => x.Id == key);
         return result;
@@ -51,13 +48,14 @@ public class FoodHandler : SqlHandlerBase<FoodDbo>
 
     public FoodDbo[] SelectLast(int count, long chatId, long userId, string? sub)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         var query = dataContext.Table.Where(x => x.ChatId == chatId && x.UserId == userId);
 
         if (!string.IsNullOrWhiteSpace(sub))
         {
             query = query.Where(x => x.Name.Contains(sub));
         }
-            
+
         return query
             .OrderByDescending(x => x.Timestamp)
             .Take(count)
@@ -65,28 +63,24 @@ public class FoodHandler : SqlHandlerBase<FoodDbo>
     }
 }
 
-// ReSharper disable once ClassNeverInstantiated.Global
-public class FoodMessageHandler : SqlHandlerBase<FoodMessageDbo>
+public class FoodMessageContext(DbContextOptions<FoodContext> options) : DbContext(options)
 {
-    private readonly DataContextBase<FoodMessageDbo> dataContext;
+    public DbSet<FoodMessageDbo> Table { get; set; }
+}
 
-    public FoodMessageHandler(DataContextBase<FoodMessageDbo> dataContext)
-    {
-        this.dataContext = dataContext;
-    }
-
-    public void Update()
-    {
-        dataContext.SaveChanges();
-    }
-
+// ReSharper disable once ClassNeverInstantiated.Global
+public class FoodMessageHandler(IDbContextFactory<FoodMessageContext> dbContextFactory)
+{
     public void Create(params FoodMessageDbo[] items)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         dataContext.Table.AddRange(items);
+        dataContext.SaveChanges();
     }
 
     public FoodMessageDbo[] SelectLast(int count, long chatId, long userId)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         return dataContext.Table
             .Where(x => x.ChatId == chatId && x.UserId == userId)
             .OrderByDescending(x => x.MessageDate)
@@ -96,6 +90,7 @@ public class FoodMessageHandler : SqlHandlerBase<FoodMessageDbo>
 
     public FoodMessageDbo[] SelectFromDate(DateTime fromDate, long chatId, long userId)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         return dataContext.Table
             .Where(x => x.MessageDate >= fromDate)
             .Where(x => x.ChatId == chatId && x.UserId == userId)

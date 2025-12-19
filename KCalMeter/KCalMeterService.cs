@@ -1,22 +1,11 @@
-using Tolltech.SqlEF;
 
 namespace Tolltech.KCalMeter;
 
-public class KCalMeterService : IKCalMeterService
+public class KCalMeterService(FoodHandler foodHandler, FoodMessageHandler foodMessageHandler) : IKCalMeterService
 {
-    private readonly IQueryExecutorFactory queryExecutorFactory;
-
-    public KCalMeterService(IQueryExecutorFactory queryExecutorFactory)
-    {
-        this.queryExecutorFactory = queryExecutorFactory;
-    }
-
     public Task WritePortion(string name, decimal portion, long chatId, long userId, DateTime messageDate)
     {
-        using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
-        using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
-
-        var food = queryExecutorFood.Execute(f => f.ReadFood(name, chatId, userId));
+        var food = foodHandler.ReadFood(name, chatId, userId);
 
         var kcal = food.Kcal * portion / food.BasePortion;
         var protein = food.Protein * portion / food.BasePortion;
@@ -38,27 +27,24 @@ public class KCalMeterService : IKCalMeterService
             Carbohydrate = (int)carbohydrate
         };
 
-        queryExecutorFoodMessage.Execute(f => f.Create(newPortion));
+        foodMessageHandler.Create(newPortion);
 
         return Task.CompletedTask;
     }
 
     public Task DeleteFood(string name, long chatId, long userId)
     {
-        using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
-        var toDelete = queryExecutorFood.Execute(x => x.Find(name, chatId, userId));
+        var toDelete = foodHandler.Find(name, chatId, userId);
 
         if (toDelete == null) return Task.CompletedTask;
 
-        queryExecutorFood.Execute(x => x.Delete(toDelete));
+        foodHandler.Delete(toDelete);
 
         return Task.CompletedTask;
     }
 
     public Task WriteFood(string name, int basePortion, FoodInfo foodInfo, long chatId, long userId)
     {
-        using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
-
         var newFood = new FoodDbo
         {
             Id = FoodDbo.GetId(name, chatId, userId),
@@ -72,32 +58,29 @@ public class KCalMeterService : IKCalMeterService
             BasePortion = basePortion
         };
 
-        var toDelete = queryExecutorFood.Execute(f => f.Find(name, chatId, userId));
+        var toDelete = foodHandler.Find(name, chatId, userId);
         if (toDelete != null)
         {
-            queryExecutorFood.Execute(f => f.Delete(toDelete));
+            foodHandler.Delete(toDelete);
         }
 
-        queryExecutorFood.Execute(f => f.Create(newFood));
+        foodHandler.Create(newFood);
 
         return Task.CompletedTask;
     }
 
     public Task<FoodMessageDbo[]> SelectPortions(int count, long chatId, long userId)
     {
-        using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
-        return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectLast(count, chatId, userId)));
+        return Task.FromResult(foodMessageHandler.SelectLast(count, chatId, userId));
     }
 
     public Task<FoodMessageDbo[]> SelectPortions(DateTime fromDate, long chatId, long userId)
     {
-        using var queryExecutorFoodMessage = queryExecutorFactory.Create<FoodMessageHandler, FoodMessageDbo>();
-        return Task.FromResult(queryExecutorFoodMessage.Execute(f => f.SelectFromDate(fromDate.Date, chatId, userId)));
+        return Task.FromResult(foodMessageHandler.SelectFromDate(fromDate.Date, chatId, userId));
     }
 
     public Task<FoodDbo[]> SelectFood(int count, long chatId, long userId, string? sub)
     {
-        using var queryExecutorFood = queryExecutorFactory.Create<FoodHandler, FoodDbo>();
-        return Task.FromResult(queryExecutorFood.Execute(f => f.SelectLast(count, chatId, userId, sub)));
+        return Task.FromResult(foodHandler.SelectLast(count, chatId, userId, sub));
     }
 }

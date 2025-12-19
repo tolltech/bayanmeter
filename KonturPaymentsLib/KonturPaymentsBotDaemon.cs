@@ -15,7 +15,6 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Tolltech.SqlEF;
 using Tolltech.TelegramCore;
 
 namespace Tolltech.KonturPaymentsLib
@@ -24,9 +23,9 @@ namespace Tolltech.KonturPaymentsLib
     {
         public const string Key = "KonturPayments";
         
-        private readonly IQueryExecutorFactory queryExecutorFactory;
         private readonly TelegramBotClient telegramBotClient;
         private readonly ITelegramClient telegramClient;
+        private readonly MoiraAlertHandler moiraAlertHandler;
         private static readonly ILog log = LogManager.GetLogger(typeof(KonturPaymentsBotDaemon));
 
         private static System.Timers.Timer timer;
@@ -35,12 +34,13 @@ namespace Tolltech.KonturPaymentsLib
         private static readonly ConcurrentDictionary<DateTime, int> timerDates =
             new ConcurrentDictionary<DateTime, int>();
 
-        public KonturPaymentsBotDaemon(IQueryExecutorFactory queryExecutorFactory, [FromKeyedServices(Key)] TelegramBotClient telegramBotClient,
-            [FromKeyedServices(Key)] ITelegramClient telegramClient)
+        public KonturPaymentsBotDaemon([FromKeyedServices(Key)] TelegramBotClient telegramBotClient,
+            [FromKeyedServices(Key)] ITelegramClient telegramClient,
+            MoiraAlertHandler moiraAlertHandler)
         {
-            this.queryExecutorFactory = queryExecutorFactory;
             this.telegramBotClient = telegramBotClient;
             this.telegramClient = telegramClient;
+            this.moiraAlertHandler = moiraAlertHandler;
         }
 
         private void OnTimedEvent()
@@ -166,8 +166,8 @@ namespace Tolltech.KonturPaymentsLib
         private async Task SendCheckReportAsync(ITelegramBotClient client, long chatId, Guid? alertId, string alertName)
         {
             var weekAgoTicks = DateTime.Now.Date.AddDays(-7).Ticks;
-            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
-            var weekAlerts = queryExecutor.Execute(x => x.Select(weekAgoTicks, chatId));
+
+            var weekAlerts = moiraAlertHandler.Select(weekAgoTicks, chatId);
 
             weekAlerts = alertId.HasValue
                 ? weekAlerts.Where(x => x.AlertId == alertId.Value.ToString()).ToArray()
@@ -187,8 +187,7 @@ namespace Tolltech.KonturPaymentsLib
         private async Task SendLastHistoryUploadInfo(ITelegramBotClient client, CancellationToken cancellationToken,
             Message? message)
         {
-            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
-            var lastTimestamp = queryExecutor.Execute(x => x.GetLastTimestamp());
+            var lastTimestamp = moiraAlertHandler.GetLastTimestamp();
             var lastTimestampDate = new DateTime(lastTimestamp);
             var diff = DateTime.UtcNow - lastTimestampDate;
 
@@ -234,10 +233,8 @@ namespace Tolltech.KonturPaymentsLib
         private async Task SendDiffReportAsync(ITelegramBotClient client, long chatId, DateTime fromDate,
             DateTime toDate)
         {
-            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
-
-            var todayAlerts = queryExecutor.Execute(f => f.Select(toDate.Ticks, chatId));
-            var yesterdayAlerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId, toDate.Ticks));
+            var todayAlerts = moiraAlertHandler.Select(toDate.Ticks, chatId);
+            var yesterdayAlerts = moiraAlertHandler.Select(fromDate.Ticks, chatId, toDate.Ticks);
 
             await client.SendTextMessageAsync(chatId, $"``` Diff from {fromDate:yyyy-MM-dd} to {toDate:yyyy-MM-dd} ```",
                 null, ParseMode.Markdown).ConfigureAwait(false);
@@ -285,9 +282,8 @@ namespace Tolltech.KonturPaymentsLib
             await client.SendTextMessageAsync(chatId, $"``` Stats from {fromDate:yyyy-MM-dd hh:mm} ```",
                     null, ParseMode.Markdown)
                 .ConfigureAwait(false);
-
-            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
-            var alerts = queryExecutor.Execute(f => f.Select(fromDate.Ticks, chatId, periodEnd.Ticks));
+            
+            var alerts = moiraAlertHandler.Select(fromDate.Ticks, chatId, periodEnd.Ticks);
 
             var lines =
                 new[] { "Name;Status;Count;LastDate;Url" }
@@ -327,10 +323,8 @@ namespace Tolltech.KonturPaymentsLib
         {
             var alerts = GetAlerts(chatHistory.Messages, chatId).ToArray();
 
-            using var queryExecutor = queryExecutorFactory.Create<MoiraAlertHandler, MoiraAlertDbo>();
-
-            var deletedCount = queryExecutor.Execute(f => f.Delete(alerts.Select(x => x.StrId).ToArray()));
-            queryExecutor.Execute(f => f.Create(alerts));
+            var deletedCount = moiraAlertHandler.Delete(alerts.Select(x => x.StrId).ToArray());
+            moiraAlertHandler.Create(alerts);
             return Task.FromResult((deletedCount, alerts.Length));
         }
 

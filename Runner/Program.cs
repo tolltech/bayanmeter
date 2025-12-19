@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Tolltech.AlertBot;
+using Tolltech.BayanMeterLib.Psql;
 using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.CoreLib;
 using Tolltech.Counter;
@@ -11,9 +13,7 @@ using Tolltech.KCalMeter;
 using Tolltech.KonturPaymentsLib;
 using Tolltech.LevDimover;
 using Tolltech.Planny;
-using Tolltech.PostgreEF.Integration;
 using Tolltech.Runner;
-using Tolltech.Runner.Psql;
 using Tolltech.Storer;
 using Tolltech.TelegramCore;
 using Vostok.Logging.Abstractions;
@@ -44,7 +44,6 @@ services.AddSingleton<ILog>(log);
 
 var ignoreTypes = new HashSet<Type>
 {
-    typeof(IConnectionString),
     typeof(IBotDaemon)
 };
 var bindings = IoCResolver.Resolve((@interface, implementation) => services.AddSingleton(@interface, implementation),
@@ -67,7 +66,18 @@ var connectionString = appSettings.ConnectionString;
 
 log.Info($"Read {connectionString} connectionString");
 
-services.AddSingleton<IConnectionString>(new ConnectionString(connectionString));
+services.AddDbContextFactory<PlannyContext>((_, opt) => { opt.UseNpgsql(connectionString); });
+services.AddDbContextFactory<MessageContext>((_, opt) => { opt.UseNpgsql(connectionString); });
+services.AddDbContextFactory<CounterContext>((_, opt) => { opt.UseNpgsql(connectionString); });
+services.AddDbContextFactory<FoodContext>((_, opt) => { opt.UseNpgsql(connectionString); });
+services.AddDbContextFactory<FoodMessageContext>((_, opt) => { opt.UseNpgsql(connectionString); });
+services.AddDbContextFactory<MoiraAlertContext>((_, opt) => { opt.UseNpgsql(connectionString); });
+
+services.AddSingleton<MessageHandler>();
+services.AddSingleton<CounterHandler>();
+services.AddSingleton<FoodHandler>();
+services.AddSingleton<FoodMessageHandler>();
+services.AddSingleton<MoiraAlertHandler>();
 
 var botSettings = appSettings.BotSettings;
 log.Info($"Read {botSettings.Length} bot settings");

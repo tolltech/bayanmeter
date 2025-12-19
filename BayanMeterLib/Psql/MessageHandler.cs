@@ -1,29 +1,40 @@
 ﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
-using Tolltech.SqlEF;
-using Tolltech.SqlEF.Integration;
+using Microsoft.EntityFrameworkCore;
 
 namespace Tolltech.BayanMeterLib.Psql
 {
-    public class MessageHandler : SqlHandlerBase<MessageDbo>
+    public class MessageContext : DbContext
     {
-        private readonly DataContextBase<MessageDbo> dataContext;
-
-        public MessageHandler(DataContextBase<MessageDbo> dataContext)
+        public MessageContext(DbContextOptions<MessageContext> options) : base(options)
         {
-            this.dataContext = dataContext;
+        }
+
+        public DbSet<MessageDbo> Table { get; set; }
+    }
+    
+    public class MessageHandler
+    {
+        private readonly IDbContextFactory<MessageContext> dbContextFactory;
+
+        public MessageHandler(IDbContextFactory<MessageContext> dbContextFactory)
+        {
+            this.dbContextFactory = dbContextFactory;
         }
 
         public void Create([NotNull] [ItemNotNull] params MessageDbo[] messages)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             dataContext.Table.AddRange(messages);
+            dataContext.SaveChanges();
         }
 
         [NotNull]
         [ItemNotNull]
         public MessageDbo[] Select(string[] strIds)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             return dataContext.Table.Where(x => strIds.Contains(x.StrId)).ToArray();
         }
 
@@ -31,6 +42,7 @@ namespace Tolltech.BayanMeterLib.Psql
         [ItemNotNull]
         public MessageDbo[] Select(long chatId, DateTime fromDate, DateTime toDate)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             return dataContext.Table
                 .Where(x => x.ChatId == chatId)
                 .Where(x => x.MessageDate >= fromDate && x.MessageDate <= toDate)
@@ -43,6 +55,7 @@ namespace Tolltech.BayanMeterLib.Psql
         [CanBeNull]
         public MessageDbo GetRandom(long chatId, DateTime? fromDate = null, DateTime? toDate = null)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             var query = dataContext.Table
                 .Where(x => x.ChatId == chatId);
 
@@ -66,14 +79,10 @@ namespace Tolltech.BayanMeterLib.Psql
                 .FirstOrDefault();
         }
 
-        public void Update()
-        {
-            dataContext.SaveChanges();
-        }
-
         [CanBeNull]
         public MessageDbo Find(string messageStrId)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             return dataContext.Table.FirstOrDefault(x => x.StrId == messageStrId);
         }
     }

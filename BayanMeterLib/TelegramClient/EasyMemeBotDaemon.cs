@@ -99,7 +99,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             var bytes = telegramClient.GetFile(photoSize.FileId);
 
             var messageDto = Convert(message, bytes);
-            imageBayanService.SaveMessage(messageDto);
+            imageBayanService.CreateMessage(messageDto);
 
             log.Info($"SavedMessage {message.Chat.Id} {message.MessageId}");
 
