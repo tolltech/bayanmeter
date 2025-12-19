@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -41,6 +42,8 @@ var log = new CompositeLog(fileLog, consoleLog);
 
 var services = builder.Services;
 services.AddSingleton<ILog>(log);
+
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", Microsoft.Extensions.Logging.LogLevel.Warning);
 
 var ignoreTypes = new HashSet<Type>
 {
