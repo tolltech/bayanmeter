@@ -1,18 +1,15 @@
-﻿using Tolltech.SqlEF;
-using Tolltech.SqlEF.Integration;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Tolltech.Counter;
 
-// ReSharper disable once ClassNeverInstantiated.Global
-public class CounterHandler : SqlHandlerBase<CounterDbo>
+public class CounterContext(DbContextOptions<CounterContext> options) : DbContext(options)
 {
-    private readonly DataContextBase<CounterDbo> dataContext;
+    public DbSet<CounterDbo> Table { get; set; }
+}
 
-    public CounterHandler(DataContextBase<CounterDbo> dataContext)
-    {
-        this.dataContext = dataContext;
-    }
-
+// ReSharper disable once ClassNeverInstantiated.Global
+public class CounterHandler(IDbContextFactory<CounterContext> dbContextFactory)
+{
     public CounterDbo ReadFood(string userName, long chatId)
     {
         var key = CounterDbo.GetId(userName, chatId);
@@ -25,18 +22,16 @@ public class CounterHandler : SqlHandlerBase<CounterDbo>
         return result;
     }
 
-    public void Update()
-    {
-        dataContext.SaveChanges();
-    }
-
     public void Create(params CounterDbo[] items)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         dataContext.Table.AddRange(items);
+        dataContext.SaveChanges();
     }
 
     public CounterDbo? Find(string userName, long chatId)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         var key = CounterDbo.GetId(userName, chatId);
         var result = dataContext.Table.FirstOrDefault(x => x.Id == key);
         return result;
@@ -44,6 +39,15 @@ public class CounterHandler : SqlHandlerBase<CounterDbo>
 
     public CounterDbo[] Select(long chatId)
     {
+        using var dataContext = dbContextFactory.CreateDbContext();
         return dataContext.Table.Where(x => x.ChatId == chatId).OrderByDescending(x => x.Counter).ToArray();
+    }
+
+    public void UpdateCounter(string existentId, int existentCounter)
+    {
+        using var dataContext = dbContextFactory.CreateDbContext();
+        var entity = dataContext.Table.Single(x => x.Id == existentId);
+        entity.Counter = existentCounter;
+        dataContext.SaveChanges();
     }
 }

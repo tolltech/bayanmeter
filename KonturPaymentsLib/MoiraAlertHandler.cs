@@ -1,42 +1,56 @@
 ﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
-using Tolltech.SqlEF;
-using Tolltech.SqlEF.Integration;
+using Microsoft.EntityFrameworkCore;
 
 namespace Tolltech.KonturPaymentsLib
 {
-    public class MoiraAlertHandler : SqlHandlerBase<MoiraAlertDbo>
+    public class MoiraAlertContext : DbContext
     {
-        private readonly DataContextBase<MoiraAlertDbo> dataContext;
-
-        public MoiraAlertHandler(DataContextBase<MoiraAlertDbo> dataContext)
+        public MoiraAlertContext(DbContextOptions<MoiraAlertContext> options) : base(options)
         {
-            this.dataContext = dataContext;
+        }
+
+        public DbSet<MoiraAlertDbo> Table { get; set; }
+    }
+    
+    
+    public class MoiraAlertHandler
+    {
+        private readonly IDbContextFactory<MoiraAlertContext> dbContextFactory;
+
+        public MoiraAlertHandler(IDbContextFactory<MoiraAlertContext> dbContextFactory)
+        {
+            this.dbContextFactory = dbContextFactory;
         }
 
         public int Delete(string[] ids)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             var toDelete = dataContext.Table
                 .Where(x => ids.Contains(x.StrId))
                 .ToArray();
 
-            dataContext.Delete(toDelete);
+            dataContext.Remove(toDelete);
+            dataContext.SaveChanges();
             return toDelete.Length;
         }
 
         public void Create([NotNull] [ItemNotNull] params MoiraAlertDbo[] alerts)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             dataContext.Table.AddRange(alerts);
         }
 
         public long GetLastTimestamp()
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             return dataContext.Table.OrderByDescending(x => x.Timestamp).Select(x => x.Timestamp).FirstOrDefault();
         }
 
         public MoiraAlertDbo[] Select(long exclusiveFromUtcTicks, long chatId, long? exclusiveToTicks = null)
         {
+            using var dataContext = dbContextFactory.CreateDbContext();
             var from = new DateTime(exclusiveFromUtcTicks);
             var query = dataContext.Table
                 .Where(x => x.MessageDate > from)

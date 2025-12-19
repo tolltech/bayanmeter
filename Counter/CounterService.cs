@@ -1,8 +1,7 @@
-﻿using Tolltech.SqlEF;
-
+﻿
 namespace Tolltech.Counter;
 
-public class CounterService(IQueryExecutorFactory queryExecutorFactory) : ICounterService
+public class CounterService(CounterHandler counterHandler) : ICounterService
 {
     private static readonly object locker = new();
 
@@ -10,23 +9,22 @@ public class CounterService(IQueryExecutorFactory queryExecutorFactory) : ICount
     {
         lock (locker)
         {
-            var queryExecutor = queryExecutorFactory.Create<CounterHandler, CounterDbo>();
-            var existent = queryExecutor.Execute(f => f.Find(userName, chatId));
+            var existent = counterHandler.Find(userName, chatId);
             if (existent == null)
             {
-                queryExecutor.Execute(f => f.Create(new CounterDbo
+                counterHandler.Create(new CounterDbo
                 {
                     Id = CounterDbo.GetId(userName, chatId),
                     UserName = userName,
                     ChatId = chatId,
                     Counter = delta,
                     Timestamp = DateTime.UtcNow.Ticks,
-                }));
+                });
             }
             else
             {
                 existent.Counter += delta;
-                queryExecutor.Execute(f => f.Update());
+                counterHandler.UpdateCounter(existent.Id, existent.Counter + delta);
             }
 
             return Task.CompletedTask;
@@ -35,15 +33,13 @@ public class CounterService(IQueryExecutorFactory queryExecutorFactory) : ICount
 
     public Task<int?> GetCounter(string userName, long chatId)
     {
-        var queryExecutor = queryExecutorFactory.Create<CounterHandler, CounterDbo>();
-        var existent = queryExecutor.Execute(f => f.Find(userName, chatId));
+        var existent = counterHandler.Find(userName, chatId);
         return Task.FromResult(existent?.Counter);
     }
 
     public Task<(string Username, int Score)[]> GetCounters(long chatId)
     {
-        var queryExecutor = queryExecutorFactory.Create<CounterHandler, CounterDbo>();
-        var counters = queryExecutor.Execute(f => f.Select(chatId));
+        var counters = counterHandler.Select(chatId);
         return Task.FromResult(counters.Select(x => (x.UserName, x.Counter)).ToArray());
     }
 }
