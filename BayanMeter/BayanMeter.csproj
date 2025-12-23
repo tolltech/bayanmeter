@@ -36,7 +36,6 @@
     <ProjectReference Include="..\KCalMeter\KCalMeter.csproj" />
     <ProjectReference Include="..\KonturPaymentsLib\KonturPaymentsLib.csproj" />
     <ProjectReference Include="..\LevDimover\LevDimover.csproj" />
-    <ProjectReference Include="..\StorerLib\StorerLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

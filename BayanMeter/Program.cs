@@ -8,7 +8,6 @@ using Tolltech.Core;
 using Tolltech.TelegramCore;
 using Telegram.Bot.Extensions.Polling;
 using Tolltech.CoreLib;
-using Tolltech.Storer;
 
 namespace Tolltech.BayanMeter
 {
@@ -46,10 +45,7 @@ namespace Tolltech.BayanMeter
             
             var botSettings = appSettings?.BotSettings ?? [];
             Console.WriteLine($"Read {botSettings.Length} bot settings");
-
-            kernel.Unbind<IBotDaemon>();
-            kernel.Bind<IBotDaemon>().To<ServerStorerBotDaemon>().Named(ServerStorerBotDaemon.Key);
-
+            
             using var cts = new CancellationTokenSource();
 
             foreach (var botSetting in botSettings)

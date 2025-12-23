@@ -23,7 +23,6 @@
       <ProjectReference Include="..\KonturPaymentsLib\KonturPaymentsLib.csproj" />
       <ProjectReference Include="..\LevDimover\LevDimover.csproj" />
       <ProjectReference Include="..\Planny\Planny.csproj" />
-      <ProjectReference Include="..\StorerLib\StorerLib.csproj" />
     </ItemGroup>
 
     <ItemGroup>
