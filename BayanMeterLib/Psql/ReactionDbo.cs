@@ -1,8 +1,8 @@
 ﻿namespace Tolltech.BayanMeterLib.Psql
 {
-    public class Reaction
+    public class ReactionDbo
     {
-        public string Emoji { get; set; }
-        public int Count { get; set; }
+        public required string TextOrId { get; set; }
+        public long FromUser { get; set; }
     }
 }

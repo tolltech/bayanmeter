@@ -107,3 +107,7 @@ CREATE TABLE IF NOT EXISTS counters(
 CREATE INDEX IF NOT EXISTS ix_counters_user_name ON counters (user_name);
 CREATE INDEX IF NOT EXISTS ix_counters_chat_id ON counters (chat_id);
 CREATE INDEX IF NOT EXISTS ix_counters_timestamp ON counters (timestamp);
+
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS reactions_count int NOT NULL DEFAULT(0);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_messages_reactions_count ON messages (reactions_count);
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS reactions jsonb NOT NULL DEFAULT('[]');

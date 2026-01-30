@@ -1,45 +1,30 @@
 ﻿using System;
 using System.Linq;
-using JetBrains.Annotations;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace Tolltech.BayanMeterLib.Psql
 {
-    public class MessageContext : DbContext
+    public class MessageContext(DbContextOptions<MessageContext> options) : DbContext(options)
     {
-        public MessageContext(DbContextOptions<MessageContext> options) : base(options)
-        {
-        }
-
         public DbSet<MessageDbo> Table { get; set; }
     }
     
-    public class MessageHandler
+    public class MessageHandler(IDbContextFactory<MessageContext> dbContextFactory)
     {
-        private readonly IDbContextFactory<MessageContext> dbContextFactory;
-
-        public MessageHandler(IDbContextFactory<MessageContext> dbContextFactory)
-        {
-            this.dbContextFactory = dbContextFactory;
-        }
-
-        public void Create([NotNull] [ItemNotNull] params MessageDbo[] messages)
+        public void Create(params MessageDbo[] messages)
         {
             using var dataContext = dbContextFactory.CreateDbContext();
             dataContext.Table.AddRange(messages);
             dataContext.SaveChanges();
         }
 
-        [NotNull]
-        [ItemNotNull]
         public MessageDbo[] Select(string[] strIds)
         {
             using var dataContext = dbContextFactory.CreateDbContext();
             return dataContext.Table.Where(x => strIds.Contains(x.StrId)).ToArray();
         }
 
-        [NotNull]
-        [ItemNotNull]
         public MessageDbo[] Select(long chatId, DateTime fromDate, DateTime toDate)
         {
             using var dataContext = dbContextFactory.CreateDbContext();
@@ -49,11 +34,8 @@ namespace Tolltech.BayanMeterLib.Psql
                 .OrderBy(x => x.MessageDate)
                 .ToArray();
         }
-
-        private static readonly Random rnd = new Random();
-
-        [CanBeNull]
-        public MessageDbo GetRandom(long chatId, DateTime? fromDate = null, DateTime? toDate = null)
+        
+        public MessageDbo? GetRandom(long chatId, DateTime? fromDate = null, DateTime? toDate = null)
         {
             using var dataContext = dbContextFactory.CreateDbContext();
             var query = dataContext.Table
@@ -71,19 +53,29 @@ namespace Tolltech.BayanMeterLib.Psql
 
             var count = query.Count();
 
-            var number = rnd.Next(count - 1);
+            var number = Random.Shared.Next(count - 1);
 
             return query
                 .OrderBy(x => x.MessageDate)
                 .Skip(number)
                 .FirstOrDefault();
         }
-
-        [CanBeNull]
-        public MessageDbo Find(string messageStrId)
+        
+        public async Task<MessageDbo?> Find(string messageStrId)
         {
-            using var dataContext = dbContextFactory.CreateDbContext();
-            return dataContext.Table.FirstOrDefault(x => x.StrId == messageStrId);
+            await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+            return await dataContext.Table.FirstOrDefaultAsync(x => x.StrId == messageStrId);
+        }
+
+        public async Task UpdateReactions(string strId, ReactionDbo[] newReactions)
+        {
+            await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+            var message = await dataContext.Table.FirstAsync(x => x.StrId == strId);
+            
+            message.ReactionsCount = newReactions.Length;
+            message.Reactions = newReactions;
+            
+            await dataContext.SaveChangesAsync();
         }
     }
 }
