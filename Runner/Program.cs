@@ -151,7 +151,7 @@ foreach (var botSetting in botSettings)
             receiverOptions,
             cancellationToken: cts.Token);
 
-        var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
+        var me = client.GetMe(cts.Token).GetAwaiter().GetResult();
 
         log.Info($"Start listening for @{me.Username}");
     }

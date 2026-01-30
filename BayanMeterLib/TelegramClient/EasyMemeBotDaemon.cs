@@ -79,7 +79,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
         private Task SendEasyMemeAsync(ITelegramBotClient client, long chatId)
         {
             var randomMessage = memEasyService.GetRandomMessages(chatId);
-            return client.SendTextMessageAsync(chatId, "take it easy", replyToMessageId: randomMessage.IntId);
+            return client.SendMessage(chatId, "take it easy",
+                replyParameters: new ReplyParameters { MessageId = randomMessage.IntId });
         }
 
         private Task SaveMessageIfPhotoAsync(Message message)

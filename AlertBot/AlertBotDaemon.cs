@@ -43,10 +43,10 @@ public class AlertBotDaemon : IBotDaemon
             var messageText = message.Text ?? string.Empty;
             if (messageText.ToLower() == "тест алерт")
             {
-                await client.SendTextMessageAsync(message.Chat.Id,
+                await client.SendMessage(message.Chat.Id,
                     $"работает в чате {message.Chat.Id}",
                     cancellationToken: cancellationToken,
-                    replyToMessageId: message.MessageId);
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId });
             }
         }
         catch (Exception e)
@@ -54,7 +54,7 @@ public class AlertBotDaemon : IBotDaemon
             log.Error("BotDaemonException", e);
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                await client.SendMessage(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
     }

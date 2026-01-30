@@ -74,7 +74,7 @@ namespace Tolltech.BayanMeter
                     receiverOptions,
                     cancellationToken: cts.Token);
 
-                var me = client.GetMeAsync(cts.Token).GetAwaiter().GetResult();
+                var me = client.GetMe(cts.Token).GetAwaiter().GetResult();
 
                 Console.WriteLine($"Start listening for @{me.Username}");
             }

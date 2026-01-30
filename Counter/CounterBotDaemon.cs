@@ -36,8 +36,9 @@ public class CounterBotDaemon(ICounterService counterService)
                 {
                     var counters = await counterService.GetCounters(chatId);
                     var msg = string.Join(Environment.NewLine, counters.Select(x => $"{x.Username} {x.Score}"));
-                    await client.SendTextMessageAsync(chatId, msg,
-                        cancellationToken: cancellationToken, replyToMessageId: message.MessageId);
+                    await client.SendMessage(chatId, msg,
+                        cancellationToken: cancellationToken,
+                        replyParameters: new ReplyParameters { MessageId = message.MessageId });
                 }
                 else if (messageText.StartsWith("/my_score"))
                 {
@@ -90,7 +91,7 @@ public class CounterBotDaemon(ICounterService counterService)
             log.Error("BotDaemonException", e);
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                await client.SendMessage(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
     }
@@ -99,8 +100,8 @@ public class CounterBotDaemon(ICounterService counterService)
         long chatId, int messageId)
     {
         var userScoreText = await BuildUserScoreText(userName, chatId);
-        await client.SendTextMessageAsync(chatId, userScoreText, cancellationToken: cancellationToken,
-            replyToMessageId: messageId);
+        await client.SendMessage(chatId, userScoreText, cancellationToken: cancellationToken,
+            replyParameters: new ReplyParameters { MessageId = messageId });
     }
 
     private async Task<string> BuildUserScoreText(string userName, long chatId)

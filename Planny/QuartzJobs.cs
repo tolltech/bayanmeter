@@ -32,7 +32,7 @@ public class PlanJob(TelegramBotClient telegramBotClient, ILog log) : IJob
             var msgText = jobData.GetString(MsgTextName);
             var chatId = jobData.GetLongValue(nameof(PlanDbo.ChatId));
 
-            await telegramBotClient.SendTextMessageAsync(chatId, msgText ?? "Unknown");
+            await telegramBotClient.SendMessage(chatId, msgText ?? "Unknown");
         }
         catch (Exception e)
         {

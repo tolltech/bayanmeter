@@ -17,8 +17,9 @@ namespace Tolltech.TelegramCore
         {
             using (var stream = new MemoryStream())
             {
-                var file = client.GetFileAsync(fileId).GetAwaiter().GetResult();
-                client.DownloadFileAsync(file.FilePath, stream).GetAwaiter().GetResult();
+                var file = client.GetFile(fileId).GetAwaiter().GetResult();
+                
+                client.DownloadFile(file.FilePath, stream).GetAwaiter().GetResult();
                 stream.Seek(0, SeekOrigin.Begin);
 
                 return stream.ReadToByteArray();

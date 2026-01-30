@@ -68,16 +68,16 @@ public class PlannyBotDaemon(
                 replyMessageText = await CreateChatSettings(message, messageText);
             }
 
-            await client.SendTextMessageAsync(message.Chat.Id, replyMessageText,
+            await client.SendMessage(message.Chat.Id, replyMessageText,
                 cancellationToken: cancellationToken,
-                replyToMessageId: message.MessageId);
+                replyParameters: new ReplyParameters { MessageId = message.MessageId });
         }
         catch (Exception e)
         {
             log.Error(e, "BotDaemonException");
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                await client.SendMessage(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
     }
