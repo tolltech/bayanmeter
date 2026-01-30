@@ -17,10 +17,12 @@ using Vostok.Logging.Abstractions;
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public class EasyMemeBotDaemon(
-        [FromKeyedServices(EasyMemeBotDaemon.Key)] ITelegramClient telegramClient,
+        [FromKeyedServices(EasyMemeBotDaemon.Key)]
+        ITelegramClient telegramClient,
         IImageBayanService imageBayanService,
         IMemEasyService memEasyService,
-        ILog log)
+        ILog log,
+        MessageHandler messageHandler)
         : IBotDaemon
     {
         public const string Key = "EasyMeme";
@@ -34,13 +36,13 @@ namespace Tolltech.BayanMeterLib.TelegramClient
             {
                 log.Info(
                     $"Received update chat {update.Message?.Chat?.Id} msg {update.Message?.MessageId} type {update.Type}");
-                
+
                 if (update.Message?.Chat?.Id == -1001462479991)
                 {
                     var text = $"Message {JsonConvert.SerializeObject(update, Formatting.Indented)}";
                     log.Info(text);
                 }
-                
+
                 if (update.Type == UpdateType.MessageReaction && update.MessageReaction != null)
                 {
                     await ProcessMessageReaction(update.MessageReaction, client);
@@ -49,7 +51,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 // Only process Message updates: https://core.telegram.org/bots/api#message
                 if (update.Type != UpdateType.Message)
                     return;
-                
+
                 var message = update.Message;
                 if (message == null)
                 {
@@ -58,17 +60,91 @@ namespace Tolltech.BayanMeterLib.TelegramClient
 
                 log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
-                await SaveMessageIfPhotoAsync(message).ConfigureAwait(false);
+                await SaveMessageIfPhotoAsync(message);
 
                 if (message.Text?.StartsWith(@"/easymeme") ?? false)
                 {
-                    await SendEasyMemeAsync(client, message.Chat.Id).ConfigureAwait(false);
+                    await SendEasyMemeAsync(client, message.Chat.Id);
+                }
+
+                if (message.Text?.StartsWith(@"/top") ?? false)
+                {
+                    await SendTopMemesAsync(client, message);
+                }
+                
+                if (message.Text?.StartsWith(@"/mytop") ?? false)
+                {
+                    await SendMyTopMemesAsync(client, message);
+                }
+                
+                if (message.Text?.StartsWith(@"/memertop") ?? false)
+                {
+                    await SendTopAuthorsAsync(client, message);
                 }
             }
             catch (Exception e)
             {
-                log.Error("BotDaemonException", e);
+                log.Error(e, "BotDaemonException");
                 Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
+            }
+        }
+
+        private async Task SendTopAuthorsAsync(ITelegramBotClient client, Message message)
+        {
+            var messageText = message.Text;
+            var chatId = message.Chat.Id;
+
+            var splits = messageText?.Split(' ') ?? [];
+            var messages = splits.Length > 1 && int.TryParse(splits[1], out var cnt) && cnt <= 10
+                ? await messageHandler.GetTopAuthorsByMessages(chatId, cnt)
+                : await messageHandler.GetTopAuthorsByMessages(chatId);
+
+            foreach (var msg in messages)
+            {
+                var userName = msg.LastMessage.FromUserName ?? "anonymous";
+                await client.SendMessage(chatId, $"@{userName} with {msg.Count}",
+                    replyParameters: new ReplyParameters { MessageId = msg.MostReactedMessage.IntId });
+                await Task.Delay(500);
+            }
+        }
+
+        private async Task SendMyTopMemesAsync(ITelegramBotClient client, Message message)
+        {
+            var userId = message.From?.Id;
+            
+            if (userId == null) return;
+            
+            var messageText = message.Text;
+            var chatId = message.Chat.Id;
+
+            var splits = messageText?.Split(' ') ?? [];
+            var messages = splits.Length > 1 && int.TryParse(splits[1], out var cnt) && cnt <= 10
+                ? await messageHandler.GetTopReactionsMessages(chatId, userId.Value, cnt)
+                : await messageHandler.GetTopReactionsMessages(chatId, userId.Value);
+
+            foreach (var msg in messages.OrderByDescending(x => x.ReactionsCount))
+            {
+                await client.SendMessage(chatId, $"{msg.ReactionsCount}❤",
+                    replyParameters: new ReplyParameters { MessageId = msg.IntId });
+                await Task.Delay(500);
+            }
+        }
+
+        private async Task SendTopMemesAsync(ITelegramBotClient client, Message message)
+        {
+            var messageText = message.Text;
+            var chatId = message.Chat.Id;
+
+            var splits = messageText?.Split(' ') ?? [];
+            var messages = splits.Length > 1 && int.TryParse(splits[1], out var cnt) && cnt <= 10
+                ? await messageHandler.GetTopReactionsMessages(chatId, cnt)
+                : await messageHandler.GetTopReactionsMessages(chatId);
+
+            foreach (var msg in messages.OrderByDescending(x => x.ReactionsCount))
+            {
+                await client.SendMessage(chatId, $"{msg.ReactionsCount}❤",
+                    replyParameters: new ReplyParameters { MessageId = msg.IntId });
+                await Task.Delay(500);
             }
         }
 
@@ -94,7 +170,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 };
 
                 if (text == null) continue;
-                
+
                 reactions.Add(text);
             }
 
