@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,44 +9,45 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Tolltech.BayanMeterLib.Psql;
+using Tolltech.CoreLib.Helpers;
 using Tolltech.TelegramCore;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
-    public class EasyMemeBotDaemon : IBotDaemon
+    public class EasyMemeBotDaemon(
+        [FromKeyedServices(EasyMemeBotDaemon.Key)] ITelegramClient telegramClient,
+        IImageBayanService imageBayanService,
+        IMemEasyService memEasyService)
+        : IBotDaemon
     {
         public const string Key = "EasyMeme";
 
-        private readonly ITelegramClient telegramClient;
-        private readonly IImageBayanService imageBayanService;
-        private readonly IMemEasyService memEasyService;
+        private readonly ITelegramClient telegramClient = telegramClient;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(EasyMemeBotDaemon));
-
-        public EasyMemeBotDaemon([FromKeyedServices(Key)] ITelegramClient telegramClient,
-            IImageBayanService imageBayanService, IMemEasyService memEasyService)
-        {
-            this.telegramClient = telegramClient;
-            this.imageBayanService = imageBayanService;
-            this.memEasyService = memEasyService;
-        }
 
         public async Task HandleUpdateAsync(ITelegramBotClient client, Update update,
             CancellationToken cancellationToken)
         {
-            // Only process Message updates: https://core.telegram.org/bots/api#message
-            if (update.Type != UpdateType.Message)
-                return;
-
             try
             {
+                if (update.Type == UpdateType.MessageReaction && update.MessageReaction != null)
+                {
+                    await ProcessMessageReaction(update.MessageReaction, client);
+                }
+
+                // Only process Message updates: https://core.telegram.org/bots/api#message
+                if (update.Type != UpdateType.Message)
+                    return;
+                
                 var message = update.Message;
                 if (message == null)
                 {
                     return;
                 }
 
-                log.Info($"RecieveMessage {message.Chat.Id} {message.MessageId}");
+                log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
                 await SaveMessageIfPhotoAsync(message).ConfigureAwait(false);
 
@@ -59,6 +61,41 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 log.Error("BotDaemonException", e);
                 Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             }
+        }
+
+        private async Task ProcessMessageReaction(MessageReactionUpdated updateMessageReaction,
+            ITelegramBotClient client)
+        {
+            var newReactions = updateMessageReaction.NewReaction;
+            var messageId = updateMessageReaction.MessageId;
+            var chatId = updateMessageReaction.Chat.Id;
+            var fromUserId = updateMessageReaction.User?.Id;
+
+            if (fromUserId == null) return;
+
+            var reactions = new HashSet<string>(newReactions.Length);
+            foreach (var reaction in newReactions)
+            {
+                var text = reaction switch
+                {
+                    ReactionTypeCustomEmoji reactionTypeCustomEmoji => reactionTypeCustomEmoji.CustomEmojiId,
+                    ReactionTypeEmoji reactionTypeEmoji => reactionTypeEmoji.Emoji,
+                    ReactionTypePaid reactionTypePaid => null,
+                    _ => throw new ArgumentOutOfRangeException(nameof(reaction))
+                };
+
+                if (text == null) continue;
+                
+                reactions.Add(text);
+            }
+
+            if (chatId == -1001462479991)
+            {
+                await client.SendMessage(chatId, $"reactions {reactions.JoinToString(" ")}",
+                    replyParameters: new ReplyParameters { MessageId = messageId });
+            }
+
+            await imageBayanService.UpdateReactions(messageId, chatId, fromUserId.Value, reactions.ToArray());
         }
 
         public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception,
@@ -79,7 +116,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
         private Task SendEasyMemeAsync(ITelegramBotClient client, long chatId)
         {
             var randomMessage = memEasyService.GetRandomMessages(chatId);
-            return client.SendTextMessageAsync(chatId, "take it easy", replyToMessageId: randomMessage.IntId);
+            return client.SendMessage(chatId, "take it easy",
+                replyParameters: new ReplyParameters { MessageId = randomMessage.IntId });
         }
 
         private Task SaveMessageIfPhotoAsync(Message message)
@@ -96,9 +134,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 return Task.CompletedTask;
             }
 
-            var bytes = telegramClient.GetFile(photoSize.FileId);
-
-            var messageDto = Convert(message, bytes);
+            var messageDto = Convert(message);
             imageBayanService.CreateMessage(messageDto);
 
             log.Info($"SavedMessage {message.Chat.Id} {message.MessageId}");
@@ -142,7 +178,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
         //           $"https://t.me/c/{chatId}/{bayanMetric.PreviousMessageId}";
         //}
 
-        private static MessageDto Convert(Message message, byte[] bytes)
+        private static MessageDto Convert(Message message)
         {
             var now = DateTime.UtcNow;
             return new MessageDto
@@ -155,8 +191,7 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 CreateDate = now,
                 FromUserName = message.From?.Username,
                 FromUserId = message.From?.Id ?? 0,
-                ImageBytes = bytes,
-                StrId = $"{message.Chat.Id}_{message.MessageId}",
+                StrId = MessageHelper.GetStrId(message.Chat.Id, message.MessageId),
                 Text = message.Text,
                 ForwardFromUserId = message.ForwardFrom?.Id,
                 ForwardFromUserName = message.ForwardFrom?.Username,

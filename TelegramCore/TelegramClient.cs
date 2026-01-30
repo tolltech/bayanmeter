@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Tolltech.CoreLib.Helpers;
 
@@ -13,12 +15,18 @@ namespace Tolltech.TelegramCore
             this.client = client;
         }
 
-        public byte[] GetFile(string fileId)
+        public async Task<byte[]> GetFile(string fileId)
         {
             using (var stream = new MemoryStream())
             {
-                var file = client.GetFileAsync(fileId).GetAwaiter().GetResult();
-                client.DownloadFileAsync(file.FilePath, stream).GetAwaiter().GetResult();
+                var file = await client.GetFile(fileId);
+
+                if (file.FilePath == null)
+                {
+                    throw new ArgumentException("File not found", nameof(fileId));
+                }
+                
+                await client.DownloadFile(file.FilePath, stream);
                 stream.Seek(0, SeekOrigin.Begin);
 
                 return stream.ReadToByteArray();

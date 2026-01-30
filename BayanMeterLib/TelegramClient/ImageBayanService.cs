@@ -1,44 +1,57 @@
-﻿using JetBrains.Annotations;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Tolltech.BayanMeterLib.Psql;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
-    public class ImageBayanService : IImageBayanService
+    public class ImageBayanService(MessageHandler messageHandler) : IImageBayanService
     {
-        private readonly MessageHandler messageHandler;
-
-        public ImageBayanService(MessageHandler messageHandler)
-        {
-            this.messageHandler = messageHandler;
-        }
-
         public void CreateMessage(MessageDto message)
         {
             var toCreate = Convert(message);
             messageHandler.Create(toCreate);
         }
 
-        private MessageDbo Convert([NotNull] MessageDto from, [CanBeNull] MessageDbo to = null)
+        public async Task UpdateReactions(int messageId, long chatId, long fromUserId, string[] reactions)
         {
-            var result = to ?? new MessageDbo();
+            var strId = MessageHelper.GetStrId(chatId, messageId);
+            var message = await messageHandler.Find(strId);
+            if (message == null) return;
 
-            result.StrId = from.StrId;
-            result.Text = from.Text;
-            result.ForwardFromChatName = from.ForwardFromChatName;
-            result.EditDate = from.EditDate;
-            result.ForwardFromMessageId = from.ForwardFromMessageId;
-            result.ChatId = from.ChatId;
-            result.FromUserId = from.FromUserId;
-            result.ForwardFromUserId = from.ForwardFromUserId;
-            result.CreateDate = from.CreateDate;
-            result.ForwardFromUserName = from.ForwardFromUserName;
-            result.ForwardFromChatId = from.ForwardFromChatId;
-            result.FromUserName = from.FromUserName;
-            result.IntId = from.IntId;
-            result.MessageDate = from.MessageDate;
-            result.Timestamp = from.Timestamp;
-            result.Hash = string.Empty;
-            result.BayanCount = to?.BayanCount ?? 0;
+            var newReactions = message.Reactions
+                .Where(x => x.FromUser != fromUserId)
+                .Concat(reactions.Select(x => new ReactionDbo
+                {
+                    TextOrId = x,
+                    FromUser = fromUserId
+                }))
+                .ToArray();
+            
+            await messageHandler.UpdateReactions(strId, newReactions);
+        }
+
+        private MessageDbo Convert(MessageDto from)
+        {
+            var result = new MessageDbo
+            {
+                StrId = from.StrId,
+                Text = from.Text,
+                ForwardFromChatName = from.ForwardFromChatName,
+                EditDate = from.EditDate,
+                ForwardFromMessageId = from.ForwardFromMessageId,
+                ChatId = from.ChatId,
+                FromUserId = from.FromUserId,
+                ForwardFromUserId = from.ForwardFromUserId,
+                CreateDate = from.CreateDate,
+                ForwardFromUserName = from.ForwardFromUserName,
+                ForwardFromChatId = from.ForwardFromChatId,
+                FromUserName = from.FromUserName,
+                IntId = from.IntId,
+                MessageDate = from.MessageDate,
+                Timestamp = from.Timestamp,
+                Hash = string.Empty,
+                BayanCount = 0,
+            };
 
             return result;
         }

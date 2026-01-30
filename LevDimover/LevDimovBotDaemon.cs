@@ -46,19 +46,19 @@ public class LevDimovBotDaemon : IBotDaemon
                 }
 
                 await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                await client.SendPhotoAsync(message.Chat.Id, new InputFileStream(stream),
+                await client.SendPhoto(message.Chat.Id, new InputFileStream(stream),
                     cancellationToken: cancellationToken,
-                    replyToMessageId: message.MessageId);
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId } );
                 return;
             }
 
             if (messageText.Contains("instagram.com") && !messageText.Contains("ddinstagram.com")
                 || (messageText.Contains("instagram.com") && !messageText.Contains("kkinstagram.com")))
             {
-                await client.SendTextMessageAsync(message.Chat.Id,
+                await client.SendMessage(message.Chat.Id,
                     messageText.Replace("instagram.com", "kkinstagram.com"),
                     cancellationToken: cancellationToken,
-                    replyToMessageId: message.MessageId);
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId });
                 return;
             }
 
@@ -68,9 +68,9 @@ public class LevDimovBotDaemon : IBotDaemon
 
             if (messageText != replyMessageText)
             {
-                await client.SendTextMessageAsync(message.Chat.Id, replyMessageText,
+                await client.SendMessage(message.Chat.Id, replyMessageText,
                     cancellationToken: cancellationToken,
-                    replyToMessageId: message.MessageId);
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId });
             }
         }
         catch (Exception e)
@@ -78,7 +78,7 @@ public class LevDimovBotDaemon : IBotDaemon
             log.Error("BotDaemonException", e);
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                await client.SendMessage(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
     }

@@ -52,9 +52,9 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 
                 await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
 
-                await client.SendTextMessageAsync(message.Chat.Id, "Portion done!",
+                await client.SendMessage(message.Chat.Id, "Portion done!",
                     cancellationToken: cancellationToken,
-                    replyToMessageId: message.MessageId);
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId });
             }
             else if (args.Length >= 5)
             {
@@ -91,13 +91,13 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
                 await kCalMeterService.WriteFood(name, portion, foodInfo, message.Chat.Id, message.From!.Id);
                 await kCalMeterService.WritePortion(name, portion, message.Chat.Id, message.From!.Id, message.Date);
 
-                await client.SendTextMessageAsync(message.Chat.Id, "New food done!",
+                await client.SendMessage(message.Chat.Id, "New food done!",
                     cancellationToken: cancellationToken,
-                    replyToMessageId: message.MessageId);
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId });
             }
             else
             {
-                await client.SendTextMessageAsync(message.Chat.Id, "No command!", cancellationToken: cancellationToken);
+                await client.SendMessage(message.Chat.Id, "No command!", cancellationToken: cancellationToken);
             }
         }
         catch (Exception e)
@@ -105,7 +105,7 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
             log.Error("BotDaemonException", e);
             Console.WriteLine($"BotDaemonException: {e.Message} {e.StackTrace}");
             if (update.Message?.Chat.Id != null)
-                await client.SendTextMessageAsync(update.Message.Chat.Id, "Exception!",
+                await client.SendMessage(update.Message.Chat.Id, "Exception!",
                     cancellationToken: cancellationToken);
         }
     }
@@ -127,7 +127,7 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 
     private Task SendError(string text, ITelegramBotClient client, Message message, CancellationToken cancellationToken)
     {
-        return client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken);
+        return client.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken);
     }
 
     private async Task ProcessCommand(Message message, ITelegramBotClient client, CancellationToken cancellationToken)
@@ -152,8 +152,8 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 
             var text = BuildReport(portions);
 
-            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
-                replyToMessageId: message.MessageId);
+            await client.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyParameters: new ReplyParameters { MessageId = message.MessageId });
         }
         else if (messageText.StartsWith("/list"))
         {
@@ -171,8 +171,8 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 
             var text = BuildReport(foods);
 
-            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
-                replyToMessageId: message.MessageId);
+            await client.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyParameters: new ReplyParameters { MessageId = message.MessageId });
         }
         else if (messageText.StartsWith("/today"))
         {
@@ -180,8 +180,8 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 
             var text = BuildReport(portions);
 
-            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
-                replyToMessageId: message.MessageId);
+            await client.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyParameters: new ReplyParameters { MessageId = message.MessageId });
         }
 
         else if (messageText.StartsWith("/week"))
@@ -190,8 +190,8 @@ public class KCalMeterBotDaemon(IKCalMeterService kCalMeterService) : IBotDaemon
 
             var text = BuildReport(portions);
 
-            await client.SendTextMessageAsync(message.Chat.Id, text, cancellationToken: cancellationToken,
-                replyToMessageId: message.MessageId);
+            await client.SendMessage(message.Chat.Id, text, cancellationToken: cancellationToken,
+                replyParameters: new ReplyParameters { MessageId = message.MessageId });
         }
     }
 
