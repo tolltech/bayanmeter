@@ -5,15 +5,12 @@ namespace TGMigrator;
 
 public class HistoryMessage
 {
-    [JsonProperty("id")]
-    public int? MessageId { get; set; }
+    [JsonProperty("id")] public int? MessageId { get; set; }
 
-    [JsonProperty("type")]
-    public string? Type { get; set; }
+    [JsonProperty("type")] public string? Type { get; set; }
 
-    [JsonProperty("reactions")]
-    public Reaction[] Reactions { get; set; } = [];
-    
+    [JsonProperty("reactions")] public Reaction[] Reactions { get; set; } = [];
+
     public IEnumerable<ReactionDbo> GetReactions()
     {
         foreach (var reaction in Reactions)
@@ -23,7 +20,8 @@ public class HistoryMessage
                 yield return new ReactionDbo
                 {
                     TextOrId = reaction.Emoji ?? reaction.DocumentId ?? "no",
-                    FromUser = long.TryParse(new string(user.FromId.Where(char.IsDigit).ToArray()), out var r) ? r : 0L
+                    FromUser = long.TryParse(new string(user.FromId.Where(char.IsDigit).ToArray()), out var r) ? r : 0L,
+                    Count = 1
                 };
             }
 
@@ -43,26 +41,20 @@ public class HistoryMessage
 
 public class Reaction
 {
-    [JsonProperty("type")]
-    public string? Type { get; set; }
+    [JsonProperty("type")] public string? Type { get; set; }
 
-    [JsonProperty("count")]
-    public int? Count { get; set; }
+    [JsonProperty("count")] public int? Count { get; set; }
 
-    [JsonProperty("emoji")]
-    public string? Emoji { get; set; }
-    
-    [JsonProperty("document_id")]
-    public string? DocumentId { get; set; }
+    [JsonProperty("emoji")] public string? Emoji { get; set; }
 
-    [JsonProperty("recent")]
-    public FromUser[] FromUsers { get; set; } = [];
+    [JsonProperty("document_id")] public string? DocumentId { get; set; }
+
+    [JsonProperty("recent")] public FromUser[] FromUsers { get; set; } = [];
 }
 
 public class FromUser
 {
-    [JsonProperty("from_id")]
-    public string FromId { get; set; }
+    [JsonProperty("from_id")] public string FromId { get; set; }
 }
 
 
