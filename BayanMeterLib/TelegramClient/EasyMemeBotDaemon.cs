@@ -35,12 +35,10 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 log.Info(
                     $"Received update chat {update.Message?.Chat?.Id} msg {update.Message?.MessageId} type {update.Type}");
                 
-                if (update.Message?.Chat.Id == -1001462479991)
+                if (update.Message?.Chat?.Id == -1001462479991)
                 {
                     var text = $"Message {JsonConvert.SerializeObject(update, Formatting.Indented)}";
                     log.Info(text);
-                    await client.SendMessage(update.Message!.Chat.Id,
-                        text, cancellationToken: cancellationToken);
                 }
                 
                 if (update.Type == UpdateType.MessageReaction && update.MessageReaction != null)
