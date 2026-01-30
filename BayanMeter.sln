@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayanMeter", "BayanMeter\BayanMeter.csproj", "{14F709AC-A2E7-443F-B7AE-CE65B33C989F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BayanMeterLib", "BayanMeterLib\BayanMeterLib.csproj", "{033553C9-4747-4129-971E-0CFA730841D1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{B6A457BB-0593-471B-915C-3881D7D7F342}"
@@ -18,8 +16,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreLib", "CoreLib\CoreLib.csproj", "{B0C07C18-0659-4815-AC04-BB551617FF27}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyProject", "DummyProject\DummyProject.csproj", "{B3B6DD37-1893-41AC-9411-A61A54BA263C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KonturPaymentsLib", "KonturPaymentsLib\KonturPaymentsLib.csproj", "{06390A75-5814-44D2-A287-CE798C22A4C5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KCalMeter", "KCalMeter\KCalMeter.csproj", "{D78713CB-809B-45FC-A786-C447116008C5}"
 EndProject
@@ -45,10 +41,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{14F709AC-A2E7-443F-B7AE-CE65B33C989F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{14F709AC-A2E7-443F-B7AE-CE65B33C989F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{14F709AC-A2E7-443F-B7AE-CE65B33C989F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{14F709AC-A2E7-443F-B7AE-CE65B33C989F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{033553C9-4747-4129-971E-0CFA730841D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{033553C9-4747-4129-971E-0CFA730841D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{033553C9-4747-4129-971E-0CFA730841D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -77,10 +69,6 @@ Global
 		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3B6DD37-1893-41AC-9411-A61A54BA263C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{06390A75-5814-44D2-A287-CE798C22A4C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{06390A75-5814-44D2-A287-CE798C22A4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{06390A75-5814-44D2-A287-CE798C22A4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{06390A75-5814-44D2-A287-CE798C22A4C5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D78713CB-809B-45FC-A786-C447116008C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D78713CB-809B-45FC-A786-C447116008C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D78713CB-809B-45FC-A786-C447116008C5}.Release|Any CPU.ActiveCfg = Release|Any CPU

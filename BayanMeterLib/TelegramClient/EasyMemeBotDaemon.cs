@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using log4net;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Telegram.Bot;
@@ -13,30 +12,35 @@ using Telegram.Bot.Types.Enums;
 using Tolltech.BayanMeterLib.Psql;
 using Tolltech.CoreLib.Helpers;
 using Tolltech.TelegramCore;
+using Vostok.Logging.Abstractions;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public class EasyMemeBotDaemon(
         [FromKeyedServices(EasyMemeBotDaemon.Key)] ITelegramClient telegramClient,
         IImageBayanService imageBayanService,
-        IMemEasyService memEasyService)
+        IMemEasyService memEasyService,
+        ILog log)
         : IBotDaemon
     {
         public const string Key = "EasyMeme";
 
         private readonly ITelegramClient telegramClient = telegramClient;
 
-        private static readonly ILog log = LogManager.GetLogger(typeof(EasyMemeBotDaemon));
-
         public async Task HandleUpdateAsync(ITelegramBotClient client, Update update,
             CancellationToken cancellationToken)
         {
             try
             {
+                log.Info(
+                    $"Received update chat {update.Message?.Chat?.Id} msg {update.Message?.MessageId} type {update.Type}");
+                
                 if (update.Message?.Chat.Id == -1001462479991)
                 {
+                    var text = $"Message {JsonConvert.SerializeObject(update, Formatting.Indented)}";
+                    log.Info(text);
                     await client.SendMessage(update.Message!.Chat.Id,
-                        $"Message {JsonConvert.SerializeObject(update, Formatting.Indented)}", cancellationToken: cancellationToken);
+                        text, cancellationToken: cancellationToken);
                 }
                 
                 if (update.Type == UpdateType.MessageReaction && update.MessageReaction != null)

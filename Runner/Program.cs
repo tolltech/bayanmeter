@@ -11,7 +11,6 @@ using Tolltech.BayanMeterLib.TelegramClient;
 using Tolltech.CoreLib;
 using Tolltech.Counter;
 using Tolltech.KCalMeter;
-using Tolltech.KonturPaymentsLib;
 using Tolltech.LevDimover;
 using Tolltech.Planny;
 using Tolltech.Runner;
@@ -73,20 +72,17 @@ services.AddDbContextFactory<MessageContext>((_, opt) => { opt.UseNpgsql(connect
 services.AddDbContextFactory<CounterContext>((_, opt) => { opt.UseNpgsql(connectionString); });
 services.AddDbContextFactory<FoodContext>((_, opt) => { opt.UseNpgsql(connectionString); });
 services.AddDbContextFactory<FoodMessageContext>((_, opt) => { opt.UseNpgsql(connectionString); });
-services.AddDbContextFactory<MoiraAlertContext>((_, opt) => { opt.UseNpgsql(connectionString); });
 
 services.AddSingleton<MessageHandler>();
 services.AddSingleton<CounterHandler>();
 services.AddSingleton<FoodHandler>();
 services.AddSingleton<FoodMessageHandler>();
-services.AddSingleton<MoiraAlertHandler>();
 
 var botSettings = appSettings.BotSettings;
 log.Info($"Read {botSettings.Length} bot settings");
 
 services.AddKeyedSingleton<IBotDaemon, PlannyBotDaemon>(PlannyBotDaemon.Key);
 services.AddKeyedSingleton<IBotDaemon, EasyMemeBotDaemon>(EasyMemeBotDaemon.Key);
-services.AddKeyedSingleton<IBotDaemon, KonturPaymentsBotDaemon>(KonturPaymentsBotDaemon.Key);
 services.AddKeyedSingleton<IBotDaemon, KCalMeterBotDaemon>("KCalMeter");
 services.AddKeyedSingleton<IBotDaemon, LevDimovBotDaemon>("LevDimover");
 services.AddKeyedSingleton<IBotDaemon, AlertBotDaemon>("AlertBot");

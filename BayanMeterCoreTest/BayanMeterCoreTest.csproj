@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BayanMeterLib\BayanMeterLib.csproj" />
-    <ProjectReference Include="..\BayanMeter\BayanMeter.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 

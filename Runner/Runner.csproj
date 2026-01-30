@@ -20,7 +20,6 @@
       <ProjectReference Include="..\BayanMeterLib\BayanMeterLib.csproj" />
       <ProjectReference Include="..\Counter\Counter.csproj" />
       <ProjectReference Include="..\KCalMeter\KCalMeter.csproj" />
-      <ProjectReference Include="..\KonturPaymentsLib\KonturPaymentsLib.csproj" />
       <ProjectReference Include="..\LevDimover\LevDimover.csproj" />
       <ProjectReference Include="..\Planny\Planny.csproj" />
     </ItemGroup>
