@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
@@ -32,6 +33,12 @@ namespace Tolltech.BayanMeterLib.TelegramClient
         {
             try
             {
+                if (update.Message?.Chat.Id == -1001462479991)
+                {
+                    await client.SendMessage(update.Message!.Chat.Id,
+                        $"Message {JsonConvert.SerializeObject(update, Formatting.Indented)}", cancellationToken: cancellationToken);
+                }
+                
                 if (update.Type == UpdateType.MessageReaction && update.MessageReaction != null)
                 {
                     await ProcessMessageReaction(update.MessageReaction, client);
