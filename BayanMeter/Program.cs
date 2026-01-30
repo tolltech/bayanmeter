@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Ninject;
 using Telegram.Bot;
@@ -28,7 +29,7 @@ namespace Tolltech.BayanMeter
 
         private static TelegramBotClient client;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine($"Start Bots {DateTime.Now}");
 
@@ -74,14 +75,14 @@ namespace Tolltech.BayanMeter
                     receiverOptions,
                     cancellationToken: cts.Token);
 
-                var me = client.GetMe(cts.Token).GetAwaiter().GetResult();
+                var me = await client.GetMe(cts.Token);
 
                 Console.WriteLine($"Start listening for @{me.Username}");
             }
             
             Console.ReadLine();
 
-            cts.Cancel();
+            await cts.CancelAsync();
 
             Console.WriteLine($"End Bots {DateTime.Now}");
         }

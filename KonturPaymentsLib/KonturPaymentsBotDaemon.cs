@@ -208,7 +208,7 @@ namespace Tolltech.KonturPaymentsLib
                 return;
             }
 
-            var file = telegramClient.GetFile(document.FileId);
+            var file = await telegramClient.GetFile(document.FileId);
 
             var chatHistory = JsonConvert.DeserializeObject<ChatDto>(Encoding.UTF8.GetString(file));
 

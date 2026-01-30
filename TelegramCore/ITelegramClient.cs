@@ -1,7 +1,9 @@
-﻿namespace Tolltech.TelegramCore
+﻿using System.Threading.Tasks;
+
+namespace Tolltech.TelegramCore
 {
     public interface ITelegramClient
     {
-        byte[] GetFile(string fileId);
+        Task<byte[]> GetFile(string fileId);
     }
 }
