@@ -67,12 +67,12 @@ namespace Tolltech.BayanMeterLib.Psql
             return await dataContext.Table.FirstOrDefaultAsync(x => x.StrId == messageStrId);
         }
 
-        public async Task UpdateReactions(string strId, ReactionDbo[] newReactions)
+        public async Task UpdateReactions(string strId, ReactionDbo[] newReactions, int? customReactionsCount = null)
         {
             await using var dataContext = await dbContextFactory.CreateDbContextAsync();
             var message = await dataContext.Table.FirstAsync(x => x.StrId == strId);
 
-            message.ReactionsCount = newReactions.Length;
+            message.ReactionsCount = customReactionsCount ?? newReactions.Length;
             message.Reactions = newReactions;
 
             await dataContext.SaveChangesAsync();
@@ -107,7 +107,7 @@ namespace Tolltech.BayanMeterLib.Psql
                 .OrderByDescending(x => x.Count())
                 .Select(x => new
                 {
-                    LastMessage = x.OrderByDescending(x => x.CreateDate).First(),
+                    LastMessage = x.OrderByDescending(x => x.MessageDate).First(),
                     MostReactedMessage = x.OrderByDescending(x => x.ReactionsCount).First(),
                     Count = x.Count()
                 })

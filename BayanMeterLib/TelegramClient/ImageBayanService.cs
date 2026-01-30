@@ -23,7 +23,8 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 .Concat(reactions.Select(x => new ReactionDbo
                 {
                     TextOrId = x,
-                    FromUser = fromUserId
+                    FromUser = fromUserId,
+                    Count = 1
                 }))
                 .ToArray();
             
