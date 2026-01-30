@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
+using Telegram.Bot.Types.Enums;
 using Tolltech.AlertBot;
 using Tolltech.BayanMeterLib.Psql;
 using Tolltech.BayanMeterLib.TelegramClient;
@@ -138,7 +139,7 @@ foreach (var botSetting in botSettings)
 
         var receiverOptions = new ReceiverOptions
         {
-            AllowedUpdates = { } // receive all update types
+            AllowedUpdates = [UpdateType.Message, UpdateType.MessageReaction, UpdateType.MessageReactionCount]
         };
 
         client.StartReceiving(
