@@ -1,10 +1,10 @@
-﻿using JetBrains.Annotations;
-using Tolltech.BayanMeterLib.Psql;
+﻿using Tolltech.BayanMeterLib.Psql;
 
 namespace Tolltech.BayanMeterLib.TelegramClient
 {
     public interface IMemEasyService
     {
-        [ItemNotNull] [NotNull] MessageDbo GetRandomMessages(long chatId);
+        MessageDbo GetRandomMessages(long chatId);
+        MessageDbo GetRandomTopMessages(long chatId);
     }
 }

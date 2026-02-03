@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS chat_settings(
 );
 
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS reactions_count int NOT NULL DEFAULT(0);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_messages_reactions_count ON messages (reactions_count);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_messages_reactions_count_message_date ON messages (reactions_count, message_date);
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS reactions jsonb NOT NULL DEFAULT('[]');
 CREATE INDEX CONCURRENTLY IF NOT exists ix_messages_chat_id_from_user_id_message_date ON messages (chat_id, from_user_id, message_date);
 CREATE INDEX CONCURRENTLY IF NOT exists ix_messages_chat_id_from_user_id_reactions_count ON messages (chat_id, from_user_id, reactions_count);

@@ -35,7 +35,7 @@ namespace Tolltech.BayanMeterLib.Psql
                 .ToArray();
         }
 
-        public MessageDbo? GetRandom(long chatId, DateTime? fromDate = null, DateTime? toDate = null)
+        public MessageDbo? GetRandom(long chatId, bool withReactions = false, DateTime? fromDate = null, DateTime? toDate = null)
         {
             using var dataContext = dbContextFactory.CreateDbContext();
             var query = dataContext.Table
@@ -49,6 +49,11 @@ namespace Tolltech.BayanMeterLib.Psql
             if (toDate.HasValue)
             {
                 query = query.Where(x => x.MessageDate <= toDate.Value);
+            }
+
+            if (withReactions)
+            {
+                query = query.Where(x => x.ReactionsCount > 0);
             }
 
             var count = query.Count();

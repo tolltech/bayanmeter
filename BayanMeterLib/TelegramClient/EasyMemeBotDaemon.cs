@@ -66,6 +66,11 @@ namespace Tolltech.BayanMeterLib.TelegramClient
                 {
                     await SendEasyMemeAsync(client, message.Chat.Id);
                 }
+                
+                if (message.Text?.StartsWith(@"/easytop") ?? false)
+                {
+                    await SendEasyTopAsync(client, message.Chat.Id);
+                }
 
                 if (message.Text?.StartsWith(@"/top") ?? false)
                 {
@@ -202,6 +207,13 @@ namespace Tolltech.BayanMeterLib.TelegramClient
         {
             var randomMessage = memEasyService.GetRandomMessages(chatId);
             return client.SendMessage(chatId, "take it easy",
+                replyParameters: new ReplyParameters { MessageId = randomMessage.IntId });
+        }
+        
+        private Task SendEasyTopAsync(ITelegramBotClient client, long chatId)
+        {
+            var randomMessage = memEasyService.GetRandomTopMessages(chatId);
+            return client.SendMessage(chatId, "top it easy",
                 replyParameters: new ReplyParameters { MessageId = randomMessage.IntId });
         }
 
