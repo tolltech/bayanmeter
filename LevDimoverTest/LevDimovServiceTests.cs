@@ -18,6 +18,8 @@ public class LevDimovServiceTests
     [TestCase("ты ,слева или как", ExpectedResult = "ты ,слева сдимова или как")]
     [TestCase("ты   , слева или   как", ExpectedResult = "ты   , слева сдимова или   как")]
     [TestCase("ты ,,слева?? или как", ExpectedResult = "ты ,,слева сдимова?? или как")]
+    [TestCase("тут ты прав", ExpectedResult = "тут ты не лев")]
+    [TestCase("стоишь справа", ExpectedResult = "стоишь снелева")]
     public string TestConvert(string input)
     {
         return LevDimovService.Convert(input);
