@@ -35,7 +35,8 @@ namespace Tolltech.BayanMeterLib.Psql
                 .ToArray();
         }
 
-        public MessageDbo? GetRandom(long chatId, bool withReactions = false, DateTime? fromDate = null, DateTime? toDate = null)
+        public MessageDbo? GetRandom(long chatId, bool withReactions = false, DateTime? fromDate = null,
+            DateTime? toDate = null)
         {
             using var dataContext = dbContextFactory.CreateDbContext();
             var query = dataContext.Table
@@ -77,7 +78,7 @@ namespace Tolltech.BayanMeterLib.Psql
             await using var dataContext = await dbContextFactory.CreateDbContextAsync();
             var message = await dataContext.Table.FirstAsync(x => x.StrId == strId);
 
-            message.ReactionsCount = customReactionsCount ?? newReactions.Length;
+            message.ReactionsCount = customReactionsCount ?? newReactions.Sum(x => x.Count);
             message.Reactions = newReactions;
 
             await dataContext.SaveChangesAsync();
