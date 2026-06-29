@@ -17,6 +17,8 @@ public class LevDimovBotDaemon : IBotDaemon
         return paths.OrderBy(x => Guid.NewGuid()).FirstOrDefault() ?? string.Empty;
     }
 
+    private static DateTime? MuteTo = null;
+    
     public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
     {
         if (update.Type != UpdateType.Message)
@@ -32,7 +34,31 @@ public class LevDimovBotDaemon : IBotDaemon
 
             log.Info($"ReceiveMessage {message.Chat.Id} {message.MessageId}");
 
+            if (MuteTo.HasValue)
+            {
+                var utcNow = DateTime.UtcNow;
+                if (utcNow < MuteTo.Value)
+                {
+                    log.Info($"Muted to {MuteTo.Value}");
+                    return;
+                }
+
+                MuteTo = null;
+            }
+            
             var messageText = message.Text ?? string.Empty;
+
+            if (messageText.StartsWith("/mute"))
+            {
+                var minutes = int.TryParse(messageText.Replace("/mute ", string.Empty), out var mute) ? mute : 5;
+                var mutePeriod = TimeSpan.FromMinutes(minutes);
+                MuteTo = DateTime.UtcNow + mutePeriod;
+                await client.SendMessage(message.Chat.Id,
+                    $"Я заткнулся на {minutes} минут",
+                    cancellationToken: cancellationToken,
+                    replyParameters: new ReplyParameters { MessageId = message.MessageId });
+                return;
+            }
 
             if (messageText.ToLower() == "лев димов"
                 || messageText.ToLower() == "лева")
