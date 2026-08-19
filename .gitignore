@@ -12,3 +12,9 @@ TGMigrator/input.json
 TGMigrator/ConnectionString.txt
 TGMigrator/input.txt
 TGMigrator/ChatExport*/*
+geofront.toml
+geofront_claude.toml
+geofront_codex.toml
+geofront_state
+geofront_switch.ps1
+geofront_switch.sh
